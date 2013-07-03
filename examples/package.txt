@@ -1,0 +1,7 @@
+NAME = simpleprocessor~
+
+SRCS = flext_simpleprocessor.cpp
+
+INCPATH = -I..
+
+# vim:filetype=make
