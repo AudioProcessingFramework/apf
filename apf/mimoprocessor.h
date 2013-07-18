@@ -253,6 +253,8 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
     typedef CombineChannelsBase<CombineChannelsInterpolation<L, Out>, L, Out>
       _base;
     typedef typename _base::T T;
+    using _base::_accumulate;
+    using _base::_out;
 
   public:
     CombineChannelsInterpolation(const L& in, Out& out) : _base(in, out) {}
@@ -266,16 +268,16 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
     template<typename ItemType, typename F>
     void case_two(const ItemType& item, F f)
     {
-      if (this->_accumulate)
+      if (_accumulate)
       {
         std::transform(item.begin(), item.end(), index_iterator<T>()
-            , make_accumulating_iterator(this->_out.begin()), f);
+            , make_accumulating_iterator(_out.begin()), f);
       }
       else
       {
         std::transform(item.begin(), item.end(), index_iterator<T>()
-            , this->_out.begin(), f);
-        this->_accumulate = true;
+            , _out.begin(), f);
+        _accumulate = true;
       }
     }
 };
