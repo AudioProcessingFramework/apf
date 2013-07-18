@@ -146,7 +146,7 @@ class fixed_vector
     fixed_vector(In first, In last, const Allocator& a = Allocator())
       : _allocator(a)
       , _size(0)
-      , _capacity(std::distance(first, last))
+      , _capacity(static_cast<size_type>(std::distance(first, last)))
       , _data(_allocator.allocate(_capacity))
     {
       _construct(first, last);
