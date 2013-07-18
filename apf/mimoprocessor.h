@@ -124,9 +124,6 @@ class MimoProcessor : public interface_policy
     class DefaultInput;
     class DefaultOutput;
 
-    struct copy {};
-    struct transform {};
-
     /// Abstract base class for list items.
     struct Item : NonCopyable
     {
