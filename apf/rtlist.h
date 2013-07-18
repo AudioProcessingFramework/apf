@@ -28,6 +28,7 @@
 #define APF_RTLIST_H
 
 #include <list>
+#include <algorithm>  // for std::find()
 
 #include "apf/commandqueue.h"
 
