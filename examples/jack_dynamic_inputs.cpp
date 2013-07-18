@@ -27,6 +27,7 @@
 #include <algorithm>  // for std::transform()
 
 #include "apf/mimoprocessor.h"
+#include "apf/combine_channels.h"  // for apf::CombineChannels
 #include "apf/jack_policy.h"
 #include "apf/posix_thread_policy.h"
 

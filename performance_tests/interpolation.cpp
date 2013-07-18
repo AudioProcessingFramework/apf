@@ -28,6 +28,7 @@
 #include "apf/pointer_policy.h"
 #include "apf/posix_thread_policy.h"
 #include "apf/mimoprocessor.h"
+#include "apf/combine_channels.h"  // for apf::CombineChannelsInterpolation
 #include "apf/container.h"  // for fixed_matrix
 #include "apf/stopwatch.h"
 

@@ -29,6 +29,7 @@
 #include <functional> // for std::multiplies(), std::bind2nd()
 
 #include "apf/mimoprocessor.h"
+#include "apf/combine_channels.h"  // for CombineChannels
 #include "apf/stringtools.h"
 #include "apf/misc.h"
 

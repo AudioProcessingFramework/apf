@@ -21,89 +21,107 @@
  *                                 http://AudioProcessingFramework.github.com *
  ******************************************************************************/
 
-// A small example of the MimoProcessor with varying JACK output ports.
-// This is a stand-alone program.
+// Tests for Combine*.
+
+#include "apf/combine_channels.h"
+
+#include "catch/catch.hpp"
 
 #include <vector>
 
-#include "apf/mimoprocessor.h"
-#include "apf/combine_channels.h"  // for apf::CombineChannelsCopy
-#include "apf/jack_policy.h"
-#include "apf/dummy_thread_policy.h"
-
-class MyProcessor : public apf::MimoProcessor<MyProcessor
-                    , apf::jack_policy
-                    , apf::dummy_thread_policy>
+struct Item : std::vector<int>
 {
-  public:
-    typedef MimoProcessorBase::DefaultInput Input;
+  template<typename I>
+  Item(I first, I last) : std::vector<int>(first, last) {}
 
-    class Output : public MimoProcessorBase::DefaultOutput
-    {
-      public:
-        explicit Output(const Params& p)
-          : MimoProcessorBase::DefaultOutput(p)
-          , _combiner(this->parent.get_input_list(), *this)
-        {}
-
-        APF_PROCESS(Output, MimoProcessorBase::DefaultOutput)
-        {
-          _combiner.process(select_all_inputs());
-        }
-
-      private:
-        struct select_all_inputs
-        {
-          int select(const Input&) { return 1; }
-        };
-
-        apf::CombineChannelsCopy<rtlist_proxy<Input>, Output> _combiner;
-    };
-
-    MyProcessor(const apf::parameter_map& p)
-      : MimoProcessorBase(p)
-    {
-      this->add<Input>();
-    }
+  void update() { /* ... */ }
 };
 
-int main()
+typedef std::vector<Item> L;
+
+struct SelectTwo { int select(const Item&) { return 2; } };
+
+class Crossfade
 {
-  int out_channels = 20;
+  public:
+    typedef std::vector<int> vi;
 
-  apf::parameter_map p;
-  p.set("threads", 1);
-  //p.set("threads", 2);  // not allowed with dummy_thread_policy!
-  MyProcessor engine(p);
-  engine.activate();
+    Crossfade(size_t block_size)
+      : _size(block_size)
+      , _fade_out(_size, 2)
+      , _fade_in(_size, 3)
+    {}
 
-  sleep(2);
+    vi::const_iterator fade_out_begin() const { return _fade_out.begin(); }
+    vi::const_iterator fade_in_begin() const { return _fade_in.begin(); }
+    size_t size() const { return _size; }
 
-  std::vector<MyProcessor::Output*> outputs;
+  private:
+    const size_t _size;
 
-  for (int i = 1; i <= out_channels; ++i)
-  {
-    MyProcessor::Output::Params op;
-    op.set("id", i * 10);
-    outputs.push_back(engine.add(op));
-    sleep(1);
-  }
+    vi _fade_out;
+    vi _fade_in;
+};
 
-  sleep(2);
+TEST_CASE("CombineChannels*", "")
+{
 
-  // remove the outputs one by one ...
-  while (outputs.begin() != outputs.end())
-  {
-    engine.rem(outputs.front());
-    engine.wait_for_rt_thread();
-    outputs.erase(outputs.begin());
-    sleep(1);
-  }
+int a[] = { 1, 2, 3, 4, 5, 6 };
 
-  sleep(2);
+L source;
+source.push_back(Item(a, a+3));
+source.push_back(Item(a+3, a+6));
 
-  engine.deactivate();
+Crossfade crossfade(3);
+
+Item target(3, 0);
+
+SECTION("CombineChannelsCopy", "")
+{
+  apf::CombineChannelsCopy<L, Item> c(source, target);
+
+  // TODO: checks
 }
+
+SECTION("CombineChannels", "")
+{
+  apf::CombineChannels<L, Item> c(source, target);
+
+  // TODO: checks
+}
+
+SECTION("CombineChannelsInterpolation", "")
+{
+  apf::CombineChannelsInterpolation<L, Item> c(source, target);
+
+  // TODO: checks
+}
+
+SECTION("CombineChannelsCrossfadeCopy", "")
+{
+  apf::CombineChannelsCrossfadeCopy<L, Item, Crossfade >
+    c(source, target, crossfade);
+
+  c.process(SelectTwo());
+
+  // TODO: use CHECK_RANGE() from test_convolver.cpp
+
+  CHECK(target[0] == 25);
+  CHECK(target[1] == 35);
+  CHECK(target[2] == 45);
+
+  // TODO: more checks?
+}
+
+SECTION("CombineChannelsCrossfade", "")
+{
+  apf::CombineChannelsCrossfade<L, Item, Crossfade >
+    c(source, target, crossfade);
+
+  // TODO: checks
+}
+
+} // TEST_CASE
 
 // Settings for Vim (http://www.vim.org/), please do not remove:
 // vim:softtabstop=2:shiftwidth=2:expandtab:textwidth=80:cindent

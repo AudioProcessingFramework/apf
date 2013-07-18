@@ -26,6 +26,7 @@
 #include <iostream>
 
 #include "apf/mimoprocessor.h"
+#include "apf/combine_channels.h"  // for apf::raised_cosine_fade, apf::Combine*
 #include "apf/jack_policy.h"
 #include "apf/posix_thread_policy.h"
 #include "apf/shareddata.h"

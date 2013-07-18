@@ -28,7 +28,8 @@
 #include "apf/pointer_policy.h"
 #include "apf/posix_thread_policy.h"
 #include "apf/mimoprocessor.h"
-#include "apf/container.h"  // for fixed_matrix
+#include "apf/combine_channels.h"  // for apf::raised_cosine_fade, Combine...
+#include "apf/container.h"  // for apf::fixed_matrix
 #include "apf/stopwatch.h"
 
 class MyProcessor : public apf::MimoProcessor<MyProcessor
