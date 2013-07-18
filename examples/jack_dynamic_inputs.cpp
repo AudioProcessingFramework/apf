@@ -60,7 +60,10 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
             explicit simple_predicate(float weight) : _weight(weight) {}
 
             // trivial, all inputs are used; no crossfade/interpolation
-            int select(const Input&) { return 1; }
+            apf::CombineChannelsResult::type select(const Input&)
+            {
+              return apf::CombineChannelsResult::constant;
+            }
 
             float operator()(float in) { return in * _weight; }
 

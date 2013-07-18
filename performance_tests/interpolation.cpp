@@ -51,10 +51,10 @@ class MyProcessor::CombineFunction
       : _block_size(float(block_size))
     {}
 
-    int select(const Input&)
+    apf::CombineChannelsResult::type select(const Input&)
     {
       _interpolator.set(3.14f, 666.666f, _block_size);
-      return 2;  // Always force interpolation
+      return apf::CombineChannelsResult::change;  // Always force interpolation
     }
 
     float operator()(float)

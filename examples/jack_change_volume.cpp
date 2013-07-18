@@ -79,20 +79,22 @@ class MyProcessor::CombineFunction
 
     CombineFunction(size_t block_size) : _block_size(float(block_size)) {}
 
-    int select(const Input& in)
+    apf::CombineChannelsResult::type select(const Input& in)
     {
+      using namespace apf::CombineChannelsResult;
+
       _weight = in.weight;
       _old_weight = in.old_weight;
 
       if (_weight != _old_weight)
       {
         _interpolator.set(_old_weight, _weight, _block_size);
-        return 2;
+        return change;
       }
 
-      if (_weight != 0.0f) return 1;
+      if (_weight != 0.0f) return constant;
 
-      return 0;
+      return nothing;
     }
 
     float operator()(float in)

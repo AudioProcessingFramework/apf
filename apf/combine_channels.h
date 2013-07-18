@@ -40,6 +40,18 @@
 namespace apf
 {
 
+namespace CombineChannelsResult
+{
+  enum type
+  {
+    nothing  = 0,
+    constant = 1,
+    change   = 2,
+    fade_in  = 3,
+    fade_out = 4
+  };
+}
+
 /** Base class for CombineChannels*.
  * @tparam Derived Derived class ("Curiously Recurring Template Pattern")
  * @tparam ListProxy Proxy class for input list. If no proxy is needed, just use
@@ -82,17 +94,20 @@ class CombineChannelsBase
           ; item != _in.end()
           ; ++item)
       {
-        switch (f.select(*item))
+        using namespace CombineChannelsResult;
+
+        switch (_selection = f.select(*item))
         {
-          case 0:
-            // Do nothing
+          case nothing:
             continue;  // jump to next list item
 
-          case 1:
+          case constant:
             static_cast<Derived*>(this)->case_one(*item, f);
             break;
 
-          case 2:
+          case change:
+          case fade_in:
+          case fade_out:
             static_cast<Derived*>(this)->case_two(*item, f);
             break;
 
@@ -160,6 +175,7 @@ class CombineChannelsBase
     }
 
     Out& _out;
+    CombineChannelsResult::type _selection;
     bool _accumulate;
 };
 
@@ -215,6 +231,7 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
     typedef CombineChannelsBase<CombineChannelsInterpolation<L, Out>, L, Out>
       _base;
     typedef typename _base::T T;
+    using _base::_selection;
     using _base::_accumulate;
     using _base::_out;
 
@@ -230,6 +247,8 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
     template<typename ItemType, typename F>
     void case_two(const ItemType& item, F f)
     {
+      assert(_selection == CombineChannelsResult::change);
+
       if (_accumulate)
       {
         std::transform(item.begin(), item.end(), index_iterator<T>()
@@ -267,12 +286,12 @@ class CombineChannelsCrossfadeBase : public CombineChannelsBase<Derived, L, Out>
 
     void before_the_loop()
     {
-      _accumulate_fade = false;
+      _accumulate_fade_in = _accumulate_fade_out = false;
     }
 
     void after_the_loop()
     {
-      if (_accumulate_fade)
+      if (_accumulate_fade_out)
       {
         if (_accumulate)
         {
@@ -284,21 +303,34 @@ class CombineChannelsCrossfadeBase : public CombineChannelsBase<Derived, L, Out>
         else
         {
           std::transform(_fade_out_buffer.begin(), _fade_out_buffer.end()
-              , _crossfade_data.fade_out_begin(), _out.begin()
+              , _crossfade_data.fade_out_begin()
+              , _out.begin()
               , std::multiplies<T>());
           _accumulate = true;
         }
-
-        // Fade-in is always accumulated:
-        std::transform(_fade_in_buffer.begin(), _fade_in_buffer.end()
-            , _crossfade_data.fade_in_begin()
-            , make_accumulating_iterator(_out.begin())
-            , std::multiplies<T>());
+      }
+      if (_accumulate_fade_in)
+      {
+        if (_accumulate)
+        {
+          std::transform(_fade_in_buffer.begin(), _fade_in_buffer.end()
+              , _crossfade_data.fade_in_begin()
+              , make_accumulating_iterator(_out.begin())
+              , std::multiplies<T>());
+        }
+        else
+        {
+          std::transform(_fade_in_buffer.begin(), _fade_in_buffer.end()
+              , _crossfade_data.fade_in_begin()
+              , _out.begin()
+              , std::multiplies<T>());
+          _accumulate = true;
+        }
       }
     }
 
   protected:
-    bool _accumulate_fade;
+    bool _accumulate_fade_in, _accumulate_fade_out;
     std::vector<T> _fade_out_buffer, _fade_in_buffer;
 
   private:
@@ -317,7 +349,9 @@ class CombineChannelsCrossfadeCopy : public CombineChannelsCrossfadeBase<
 
     using _base::_fade_out_buffer;
     using _base::_fade_in_buffer;
-    using _base::_accumulate_fade;
+    using _base::_accumulate_fade_in;
+    using _base::_accumulate_fade_out;
+    using _base::_selection;
 
   public:
     CombineChannelsCrossfadeCopy(const L& in, Out& out, const Crossfade& fade)
@@ -333,21 +367,34 @@ class CombineChannelsCrossfadeCopy : public CombineChannelsCrossfadeBase<
     template<typename ItemType, typename F>
     void case_two(ItemType& item, F)
     {
-      if (_accumulate_fade)
+      if (_selection != CombineChannelsResult::fade_in)
       {
-        std::copy(item.begin(), item.end()
-            , make_accumulating_iterator(_fade_out_buffer.begin()));
-        item.update();
-        std::copy(item.begin(), item.end()
-            , make_accumulating_iterator(_fade_in_buffer.begin()));
+        if (_accumulate_fade_out)
+        {
+          std::copy(item.begin(), item.end()
+              , make_accumulating_iterator(_fade_out_buffer.begin()));
+        }
+        else
+        {
+          std::copy(item.begin(), item.end(), _fade_out_buffer.begin());
+          _accumulate_fade_out = true;
+        }
       }
-      else
+      if (_selection != CombineChannelsResult::fade_out)
       {
-        std::copy(item.begin(), item.end(), _fade_out_buffer.begin());
         item.update();
-        std::copy(item.begin(), item.end(), _fade_in_buffer.begin());
+
+        if (_accumulate_fade_in)
+        {
+          std::copy(item.begin(), item.end()
+              , make_accumulating_iterator(_fade_in_buffer.begin()));
+        }
+        else
+        {
+          std::copy(item.begin(), item.end(), _fade_in_buffer.begin());
+          _accumulate_fade_in = true;
+        }
       }
-      _accumulate_fade = true;
     }
 };
 
@@ -360,6 +407,9 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
   private:
     typedef CombineChannelsCrossfadeBase<CombineChannelsCrossfade<
       L, Out, Crossfade>, L, Out, Crossfade> _base;
+    using _base::_selection;
+    using _base::_accumulate_fade_in;
+    using _base::_accumulate_fade_out;
 
   public:
     CombineChannelsCrossfade(const L& in, Out& out, const Crossfade& fade)
@@ -375,27 +425,38 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
     template<typename ItemType, typename F>
     void case_two(ItemType& item, F f)
     {
-      if (this->_accumulate_fade)
+      if (_selection != CombineChannelsResult::fade_in)
       {
-        std::transform(item.begin(), item.end()
-            , make_accumulating_iterator(this->_fade_out_buffer.begin())
-            //, std::bind2nd(f, fade_out_tag()));
-            , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
-        item.update();
-        std::transform(item.begin(), item.end()
-            , make_accumulating_iterator(this->_fade_in_buffer.begin()), f);
+        if (_accumulate_fade_out)
+        {
+          std::transform(item.begin(), item.end()
+              , make_accumulating_iterator(this->_fade_out_buffer.begin())
+              , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
+        }
+        else
+        {
+          std::transform(item.begin(), item.end()
+              , this->_fade_out_buffer.begin()
+              , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
+          _accumulate_fade_out = true;
+        }
       }
-      else
+      if (_selection != CombineChannelsResult::fade_out)
       {
-        std::transform(item.begin(), item.end()
-            , this->_fade_out_buffer.begin()
-            //, std::bind2nd(f, fade_out_tag()));
-            , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
         item.update();
-        std::transform(item.begin(), item.end()
-            , this->_fade_in_buffer.begin(), f);
+
+        if (_accumulate_fade_in)
+        {
+          std::transform(item.begin(), item.end()
+              , make_accumulating_iterator(this->_fade_in_buffer.begin()), f);
+        }
+        else
+        {
+          std::transform(item.begin(), item.end()
+              , this->_fade_in_buffer.begin(), f);
+          _accumulate_fade_in = true;
+        }
       }
-      this->_accumulate_fade = true;
     }
 };
 

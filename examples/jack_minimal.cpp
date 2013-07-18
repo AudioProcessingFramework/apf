@@ -55,7 +55,10 @@ class MyProcessor::Output : public MimoProcessorBase::DefaultOutput
     struct my_predicate
     {
       // trivial, all inputs are used
-      int select(const Input&) { return 1; }
+      apf::CombineChannelsResult::type select(const Input&)
+      {
+        return apf::CombineChannelsResult::constant;
+      }
     };
 
     apf::CombineChannelsCopy<rtlist_proxy<Input>, DefaultOutput> _combiner;

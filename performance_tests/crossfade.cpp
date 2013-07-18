@@ -51,9 +51,9 @@ class MyProcessor::CombineFunction
 {
   public:
     typedef float result_type;
-    int select(const Input&)
+    apf::CombineChannelsResult::type select(const Input&)
     {
-      return 2;  // Always force crossfade
+      return apf::CombineChannelsResult::change;  // Always force crossfade
     }
 
     float operator()(float in, apf::fade_out_tag)

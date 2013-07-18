@@ -39,7 +39,13 @@ struct Item : std::vector<int>
 
 typedef std::vector<Item> L;
 
-struct SelectTwo { int select(const Item&) { return 2; } };
+struct SelectChange
+{
+  apf::CombineChannelsResult::type select(const Item&)
+  {
+    return apf::CombineChannelsResult::change;
+  }
+};
 
 class Crossfade
 {
@@ -102,7 +108,7 @@ SECTION("CombineChannelsCrossfadeCopy", "")
   apf::CombineChannelsCrossfadeCopy<L, Item, Crossfade >
     c(source, target, crossfade);
 
-  c.process(SelectTwo());
+  c.process(SelectChange());
 
   // TODO: use CHECK_RANGE() from test_convolver.cpp
 

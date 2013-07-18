@@ -107,10 +107,10 @@ class SimpleProcessor::Output : public MimoProcessorBase::DefaultOutput
           : _weight(weight)
         {}
 
-        int select(const Input&)
+        apf::CombineChannelsResult::type select(const Input&)
         {
           // trivial, all inputs are used; no crossfade/interpolation
-          return 1;
+          return apf::CombineChannelsResult::constant;
         }
 
         float operator()(float in)

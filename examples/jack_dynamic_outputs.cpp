@@ -54,7 +54,10 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
       private:
         struct select_all_inputs
         {
-          int select(const Input&) { return 1; }
+          apf::CombineChannelsResult::type select(const Input&)
+          {
+            return apf::CombineChannelsResult::constant;
+          }
         };
 
         apf::CombineChannelsCopy<rtlist_proxy<Input>, Output> _combiner;
