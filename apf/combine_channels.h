@@ -82,9 +82,16 @@ class CombineChannelsBase
     {}
 
     /// Do the actual combining.
+    /// @param f A "special" function object. It has to have a member function
+    /// @c select() which takes an item of the list as parameter. Depending on
+    /// the derived class, it may also need other member functions.
     template<typename F>
     void process(F f)
     {
+      // We pass f by value because this is common in STL-like algorithms.
+      // After select() is called, it is passed to case_one() and case_two() as
+      // non-const reference to avoid a further copy.
+
       _accumulate = false;
 
       static_cast<Derived*>(this)->before_the_loop();
@@ -127,13 +134,13 @@ class CombineChannelsBase
     void before_the_loop() {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType&, F)
+    void case_one(const ItemType&, F&)
     {
       throw std::logic_error("CombineChannelsBase: case 1 not implemented!");
     }
 
     template<typename ItemType, typename F>
-    void case_two(const ItemType&, F)
+    void case_two(const ItemType&, F&)
     {
       throw std::logic_error("CombineChannelsBase: case 2 not implemented!");
     }
@@ -160,7 +167,7 @@ class CombineChannelsBase
     }
 
     template<typename ItemType, typename FunctionType>
-    void _case_one_transform(const ItemType& item, FunctionType f)
+    void _case_one_transform(const ItemType& item, FunctionType& f)
     {
       if (_accumulate)
       {
@@ -192,7 +199,7 @@ class CombineChannelsCopy : public CombineChannelsBase<
     CombineChannelsCopy(const L& in, Out& out) : _base(in, out) {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType& item, F)
+    void case_one(const ItemType& item, F&)
     {
       this->_case_one_copy(item);
     }
@@ -213,7 +220,7 @@ class CombineChannels: public CombineChannelsBase<
     CombineChannels(const L& in, Out& out) : _base(in, out) {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType& item, F f)
+    void case_one(const ItemType& item, F& f)
     {
       this->_case_one_transform(item, f);
     }
@@ -239,13 +246,13 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
     CombineChannelsInterpolation(const L& in, Out& out) : _base(in, out) {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType& item, F f)
+    void case_one(const ItemType& item, F& f)
     {
       this->_case_one_transform(item, f);
     }
 
     template<typename ItemType, typename F>
-    void case_two(const ItemType& item, F f)
+    void case_two(const ItemType& item, F& f)
     {
       assert(_selection == CombineChannelsResult::change);
 
@@ -359,13 +366,13 @@ class CombineChannelsCrossfadeCopy : public CombineChannelsCrossfadeBase<
     {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType& item, F)
+    void case_one(const ItemType& item, F&)
     {
       this->_case_one_copy(item);
     }
 
     template<typename ItemType, typename F>
-    void case_two(ItemType& item, F)
+    void case_two(ItemType& item, F& f)
     {
       if (_selection != CombineChannelsResult::fade_in)
       {
@@ -382,7 +389,7 @@ class CombineChannelsCrossfadeCopy : public CombineChannelsCrossfadeBase<
       }
       if (_selection != CombineChannelsResult::fade_out)
       {
-        item.update();
+        f.update();
 
         if (_accumulate_fade_in)
         {
@@ -417,13 +424,13 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
     {}
 
     template<typename ItemType, typename F>
-    void case_one(const ItemType& item, F f)
+    void case_one(const ItemType& item, F& f)
     {
       this->_case_one_transform(item, f);
     }
 
     template<typename ItemType, typename F>
-    void case_two(ItemType& item, F f)
+    void case_two(ItemType& item, F& f)
     {
       if (_selection != CombineChannelsResult::fade_in)
       {
@@ -443,7 +450,7 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
       }
       if (_selection != CombineChannelsResult::fade_out)
       {
-        item.update();
+        f.update();
 
         if (_accumulate_fade_in)
         {

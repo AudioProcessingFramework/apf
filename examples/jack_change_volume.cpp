@@ -112,6 +112,11 @@ class MyProcessor::CombineFunction
       return in * _interpolator(index);
     }
 
+    void update()
+    {
+      // This is called between fade-out and fade-in
+    }
+
   private:
     const float _block_size;
     float _weight, _old_weight;

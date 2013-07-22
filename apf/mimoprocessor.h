@@ -129,10 +129,6 @@ class MimoProcessor : public interface_policy
     {
       virtual ~Item() {}
 
-      /// Empty, non-virtual implementation. Used in CombineChannelsCrossfade.
-      /// This can be overwritten if needed.
-      void update() const {}
-
       /// to be overwritten in the derived class
       virtual void process() = 0;
     };

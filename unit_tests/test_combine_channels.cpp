@@ -29,13 +29,7 @@
 
 #include <vector>
 
-struct Item : std::vector<int>
-{
-  template<typename I>
-  Item(I first, I last) : std::vector<int>(first, last) {}
-
-  void update() { /* ... */ }
-};
+typedef std::vector<int> Item;
 
 typedef std::vector<Item> L;
 
@@ -45,6 +39,8 @@ struct SelectChange
   {
     return apf::CombineChannelsResult::change;
   }
+
+  void update() { /* ... */ }
 };
 
 class Crossfade
