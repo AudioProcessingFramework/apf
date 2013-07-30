@@ -125,13 +125,9 @@ class JackClient
     {
       if (!_client || jack_activate(_client)) return false;
 
-      while (_pending_connections.size() > 0)
-      {
-        // ignore return value
-        jack_connect(_client, _pending_connections.back().first.c_str()
-            , _pending_connections.back().second.c_str());
-        _pending_connections.pop_back();
-      }
+      this->connect_pending_connections();
+
+      // TODO: Still pending connections are ignored!
 
       return true;
     }
@@ -141,7 +137,8 @@ class JackClient
     /// @see jack_deactivate()
     bool deactivate() const
     {
-      // TODO: do something with _pending_connections?
+      APF_JACKCLIENT_DEBUG_MSG("pending connections @ deactivate(): "
+          << _pending_connections.size());
       return _client ? !jack_deactivate(_client) : false;
     }
 
@@ -201,22 +198,7 @@ class JackClient
     bool connect_ports(const std::string& source
         , const std::string& destination) const
     {
-      if (_client == 0) return false;
-      int success = jack_connect(_client, source.c_str(), destination.c_str());
-      switch (success)
-      {
-        case 0:
-          break;
-        case EEXIST:
-          APF_JACKCLIENT_DEBUG_MSG("Connection already exists! ("
-              + source + " -> " + destination + ")");
-          break;
-        default:
-          _pending_connections.push_back(std::make_pair(source, destination));
-          // TODO: return something else than true/false?
-          return false;
-      }
-      return true;
+      return _connect_ports_helper(source, destination, _pending_connections);
     }
 
     /// Disconnect two JACK ports.
@@ -227,6 +209,25 @@ class JackClient
         , const std::string& destination) const
     {
       return !jack_disconnect(_client, source.c_str(), destination.c_str());
+    }
+
+    bool connect_pending_connections() const
+    {
+      _pending_connections_t still_pending_connections;
+
+      APF_JACKCLIENT_DEBUG_MSG("Connecting " << _pending_connections.size()
+          << " pending connections ...");
+      while (_pending_connections.size() > 0)
+      {
+        _connect_ports_helper(_pending_connections.back().first
+            , _pending_connections.back().second, still_pending_connections);
+        _pending_connections.pop_back();
+      }
+      APF_JACKCLIENT_DEBUG_MSG("Still pending connections: "
+          << still_pending_connections.size());
+
+      _pending_connections.swap(still_pending_connections);
+      return _pending_connections.empty();
     }
 
     //@}  // manage JACK ports
@@ -404,13 +405,40 @@ class JackClient
       return static_cast<JackClient*>(arg)->jack_xrun_callback();
     }
 
+    typedef std::vector<std::pair<std::string, std::string> >
+      _pending_connections_t;
+
+    bool _connect_ports_helper(const std::string& source
+        , const std::string& destination
+        , _pending_connections_t& pending_connections) const
+    {
+      if (_client == 0) return false;
+      int success = jack_connect(_client, source.c_str(), destination.c_str());
+      switch (success)
+      {
+        case 0:
+          break;
+        case EEXIST:
+          APF_JACKCLIENT_DEBUG_MSG("Connection already exists! ("
+              << source << " -> " << destination << ")");
+          break;
+        default:
+          APF_JACKCLIENT_DEBUG_MSG("Unable to connect "
+              << source << " -> " << destination
+              << "! Adding this to pending connections ...");
+          pending_connections.push_back(std::make_pair(source, destination));
+          // TODO: return something else than true/false?
+          return false;
+      }
+      return true;
+    }
+
     std::string    _client_name;  // Name of JACK client
     jack_client_t* _client;       // Pointer to JACK client.
     nframes_t      _sample_rate;  // sample rate of JACK server
     nframes_t      _buffer_size;  // buffer size of JACK server
 
-    mutable std::vector<std::pair<std::string, std::string> >
-      _pending_connections;
+    mutable _pending_connections_t _pending_connections;
 
     JackClient(const JackClient&);             // deactivated
     JackClient& operator=(const JackClient&);  // deactivated
