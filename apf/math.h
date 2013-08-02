@@ -176,17 +176,6 @@ inline long double wrap(long double x, long double full)
   return fwrap(x, full);
 }
 
-/** Wrap an angle into the interval [0, 360) degree.
- * @param angle dito in degreess
- * @return wrapped angle in degrees.
- **/
-template<typename T>
-inline T wrap_angle(T angle)
-{
-  T full = 360;
-  return wrap(angle, full);
-}
-
 /** Find a power of 2 which is >= a given number.
  * @param number number for which to find next power of 2
  * @return power of 2 above (or equal to) \b number 

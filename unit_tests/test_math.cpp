@@ -100,16 +100,6 @@ SECTION("rad2deg", "")
   CHECK(rad2deg(pi<long double>()) == 180.0l);
 }
 
-SECTION("wrap_angle", "")
-{
-  CHECK(wrap_angle(360.5f) == 0.5f);
-  CHECK(wrap_angle(-0.001f) == 359.999f);
-  CHECK(wrap_angle(360.5) == 0.5);
-  CHECK(wrap_angle(-0.001) == 359.999);
-  CHECK(wrap_angle(360.5l) == 0.5l);
-  CHECK(wrap_angle(-0.001l) == 359.999l);
-}
-
 SECTION("next_power_of_2", "")
 {
   CHECK(next_power_of_2(-3) == 1);
