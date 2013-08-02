@@ -65,6 +65,8 @@ class MyProcessor::CombineFunction
     {
       return in * 3.14f;
     }
+
+    void update() {}  // Unused. Call will be optimized away.
 };
 
 class MyProcessor::Output : public MimoProcessorBase::DefaultOutput
