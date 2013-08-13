@@ -50,6 +50,9 @@ SECTION("first constructor", "")
 {
   apf::fixed_vector<int> fv(3);
   CHECK(fv[1] == 0);
+
+  apf::fixed_vector<int> fv2(0);
+  CHECK(fv2.size() == 0);
 }
 
 SECTION("second constructor", "")
@@ -57,6 +60,8 @@ SECTION("second constructor", "")
   apf::fixed_vector<int> fv(3ul, 99);
 
   CHECK(fv[2] == 99);
+
+  apf::fixed_vector<int> fv2(3, 99);
 }
 
 SECTION("another constructor", "")
@@ -97,42 +102,53 @@ SECTION("empty()", "not really useful ...")
   CHECK(fv.empty());
 }
 
-SECTION("reserve(), emplace_back()", "")
+apf::fixed_vector<int> default_fv;
+
+SECTION("allocate(), emplace_back()", "")
 {
-  apf::fixed_vector<int> fv;
-  CHECK(fv.empty());
-  fv.reserve(2);
-  CHECK(fv.empty());
-  fv.emplace_back(1);
-  CHECK(fv.size() == 1);
-  CHECK(fv[0] == 1);
-  fv.emplace_back(2);
-  CHECK(fv[1] == 2);
-  fv.reserve(0);
-  CHECK(fv.empty());
-  CHECK_THROWS_AS(fv.emplace_back(666), std::out_of_range);
+  CHECK(default_fv.empty());
+  default_fv.allocate(2);
+  CHECK(default_fv.empty());
+  default_fv.emplace_back(1);
+  CHECK(default_fv.size() == 1);
+  CHECK(default_fv[0] == 1);
+  default_fv.emplace_back(2);
+  CHECK(default_fv[1] == 2);
+  CHECK_THROWS_AS(default_fv.emplace_back(666), std::out_of_range);
 }
 
-SECTION("reset()", "")
+SECTION("initialize()", "")
 {
-  apf::fixed_vector<int> fv(3);
-  CHECK(fv.size() == 3);
-  fv.reset(5);
-  CHECK(fv.size() == 5);
-  fv.reset(0);
-  CHECK(fv.size() == 0);
-  fv.reset(2ul, 4);
-  CHECK(fv.size() == 2);
-  CHECK(fv[0] == 4);
-  CHECK(fv[1] == 4);
+  CHECK(default_fv.size() == 0);
 
+  default_fv.initialize(0);
+  CHECK(default_fv.size() == 0);
+
+  default_fv.initialize(5);
+  CHECK(default_fv.size() == 5);
+
+  CHECK_THROWS_AS(default_fv.initialize(0), std::logic_error);
+}
+
+SECTION("initialize() 2", "")
+{
+  CHECK(default_fv.size() == 0);
+
+  default_fv.initialize(2ul, 4);
+  CHECK(default_fv.size() == 2);
+  CHECK(default_fv[0] == 4);
+  CHECK(default_fv[1] == 4);
+}
+
+SECTION("initialize() 3", "")
+{
   int data[] = { 1, 2, 3, 4 };
-  fv.reset(data, data + 4);
-  CHECK(fv.size() == 4);
-  CHECK(fv[0] == 1);
-  CHECK(fv[1] == 2);
-  CHECK(fv[2] == 3);
-  CHECK(fv[3] == 4);
+  default_fv.initialize(data, data + 4);
+  CHECK(default_fv.size() == 4);
+  CHECK(default_fv[0] == 1);
+  CHECK(default_fv[1] == 2);
+  CHECK(default_fv[2] == 3);
+  CHECK(default_fv[3] == 4);
 }
 
 SECTION("fixed_vector<NonCopyable>", "")
@@ -140,6 +156,8 @@ SECTION("fixed_vector<NonCopyable>", "")
   apf::fixed_vector<NonCopyable> fv(1000);
 
   //std::vector<NonCopyable> v(1000);  // this wouldn't work!
+
+  apf::fixed_vector<NonCopyable> fv2();
 }
 
 } // TEST_CASE fixed_vector
@@ -238,14 +256,14 @@ typedef apf::fixed_matrix<int> fm;
 TEST_CASE("fixed_matrix", "Test fixed_matrix")
 {
 
-SECTION("default constructor", "... and reset()")
+SECTION("default constructor", "... and initialize()")
 {
   fm matrix;
   CHECK(matrix.empty());
   CHECK(matrix.channels.begin() == matrix.channels.end());
   CHECK(matrix.slices.begin() == matrix.slices.end());
 
-  matrix.reset(2, 3);
+  matrix.initialize(2, 3);
   CHECK_FALSE(matrix.empty());
   CHECK(std::distance(matrix.channels.begin(), matrix.channels.end()) == 2);
   CHECK(std::distance(matrix.slices.begin(), matrix.slices.end()) == 3);
