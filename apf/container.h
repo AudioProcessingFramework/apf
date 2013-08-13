@@ -197,7 +197,6 @@ class fixed_vector
     /// Allocate and initialize new data from sequence.
     /// @param first Iterator to argument for first element
     /// @param last Past-the-end iterator
-    /// @param 0 Dummy parameter for correct overload resolution
     /// @pre capacity() must be 0!
     /// @throw . whatever allocate() throws
     template<typename In>
@@ -515,6 +514,7 @@ class fixed_matrix : public fixed_vector<T, Allocator>
     /** Constructor.
      * @param max_channels Number of Channels
      * @param max_slices Number of Slices
+     * @param a Optional allocator
      **/
     fixed_matrix(size_type max_channels, size_type max_slices
         , const Allocator& a = Allocator())

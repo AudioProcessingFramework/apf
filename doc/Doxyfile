@@ -1,4 +1,4 @@
-# Doxyfile 1.7.1
+# Doxyfile 1.8.1.2
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for the Audio Processing Framework (APF)
@@ -23,7 +23,6 @@ EXTRACT_LOCAL_CLASSES  = YES
 HIDE_UNDOC_CLASSES     = YES
 HIDE_UNDOC_MEMBERS     = NO
 SORT_MEMBER_DOCS       = NO
-SHOW_DIRECTORIES       = NO
 WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = NO
 WARN_NO_PARAMDOC       = NO

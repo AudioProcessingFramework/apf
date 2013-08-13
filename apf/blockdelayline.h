@@ -218,6 +218,9 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T>
     typedef typename circulator::difference_type difference_type;
 
     /// Constructor. @param initial_delay initial delay
+    /// @param block_size Block size
+    /// @param max_delay Maximum delay in samples
+    /// @param initial_delay Additional delay to achieve negative delay
     /// @see BlockDelayLine::BlockDelayLine()
     NonCausalBlockDelayLine(size_type block_size, size_type max_delay
         , size_type initial_delay)

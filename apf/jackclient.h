@@ -211,6 +211,9 @@ class JackClient
       return !jack_disconnect(_client, source.c_str(), destination.c_str());
     }
 
+    /// Make connections which are still pending from a previous
+    /// call to connect_ports(). This is needed if connect_ports() has been
+    /// called while the JackClient wasn't activated yet.
     bool connect_pending_connections() const
     {
       _pending_connections_t still_pending_connections;
@@ -326,6 +329,7 @@ class JackClient
     /// @param nframes Number of frames (~samples) in the current block. This
     ///   value is delivered by the JACK server.
     /// @return message to JACK: 0 means call me again, 1 don't call me anymore.
+    /// @throw jack_error if not implemented
     /// @see callback_usage_t
     virtual int jack_process_callback(nframes_t nframes)
     {
@@ -348,7 +352,8 @@ class JackClient
     }
 
     /// JACK sample rate callback.
-    /// @param sample_rate new sample rate delivered by JACK
+    /// @param sr new sample rate delivered by JACK
+    /// @throw jack_error if not implemented
     /// @return 0 on success.
     virtual int jack_sample_rate_callback(nframes_t sr)
     {
@@ -357,6 +362,7 @@ class JackClient
     }
 
     /// JACK buffer size callback.
+    /// @throw jack_error if not implemented
     /// @return 0 on success.
     virtual int jack_buffer_size_callback(nframes_t bs)
     {
@@ -450,7 +456,7 @@ class JackClient
  * function jack_process_callback() is called by JACK in each audio cycle.
  * @warning @p name should not include a colon. This doesn't cause
  *   an error directly, but it messes up the JACK client- and portnames.
- * @throw jack_error
+ * @throw jack_error if something goes wrong
  **/
 JackClient::JackClient(const std::string& name
     , callback_usage_t callback_usage)

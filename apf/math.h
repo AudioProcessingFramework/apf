@@ -301,6 +301,7 @@ class linear_interpolator
     /// Set range and optional length.
     /// @param first output value if input is zero
     /// @param last output value if input is @p length
+    /// @param length length of interval on which to interpolate
     void set(result_type first, result_type last
         , argument_type length = argument_type(1))
     {

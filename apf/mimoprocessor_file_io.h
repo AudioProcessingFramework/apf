@@ -36,7 +36,7 @@ namespace apf
 /// Use MimoProcessor-based object with multichannel audio file input and output
 /// @param processor Object derived from MimoProcessor
 /// @param infilename Input audio file name
-/// @param infilename Output audio file name (will be overwritten if it exists)
+/// @param outfilename Output audio file name (will be overwritten if it exists)
 template<typename Processor>
 int mimoprocessor_file_io(Processor& processor
     , const std::string& infilename
