@@ -24,6 +24,12 @@
 /// @file
 /// A simple stopwatch
 
+// TODO: check C++11 timing tools:
+// http://bstamour.ca/2012/05/13/timing-functions-with-chrono/
+// http://solarianprogrammer.com/2012/10/14/cpp-11-timing-code-performance/
+// http://ideone.com/clone/SCRI6
+// http://kjellkod.wordpress.com/2012/02/06/exploring-c11-part-1-time/
+
 #include <ctime>
 #include <iostream>
 
