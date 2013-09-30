@@ -25,6 +25,8 @@ endif
 
 OBJECTS = $(TESTS:=.o)
 
+CXXFLAGS += -std=c++11
+
 CXXFLAGS += -g
 
 # show all warnings

@@ -6,6 +6,8 @@ OPT ?= -O3
 CXXFLAGS += $(OPT)
 CXXFLAGS += -g
 
+CXXFLAGS += -std=c++11
+
 LDLIBS += -lpthread
 
 # show all warnings
