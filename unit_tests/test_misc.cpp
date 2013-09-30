@@ -21,60 +21,36 @@
  *                                 http://AudioProcessingFramework.github.com *
  ******************************************************************************/
 
-/// @file
-/// Miscellaneous helper classes.
+// Tests for misc.h.
 
-#ifndef APF_MISC_H
-#define APF_MISC_H
+#include "apf/misc.h"
 
-#include <utility>  // for std::forward
+#include "catch/catch.hpp"
 
-namespace apf
+TEST_CASE("BlockParameter", "")
 {
 
-/// Classes derived from this class cannot be copied.
-/// Private copy constructor and copy assignment ensure that.
-class NonCopyable
+SECTION("default ctor", "")
 {
-  protected:
-     NonCopyable() {} ///< Protected default constructor
-    ~NonCopyable() {} ///< Protected non-virtual destructor
+  apf::BlockParameter<int> bp;
+  CHECK(0 == bp.get());
+  CHECK(0 == bp.get_old());
+}
 
-  private:
-    /// @name Deactivated copy ctor and assignment operator
-    //@{
-    NonCopyable(const NonCopyable&);
-    NonCopyable& operator=(const NonCopyable&);
-    //@}
-};
-
-template<typename T>
-class BlockParameter
+SECTION("int", "")
 {
-  public:
-    template<typename... Args>
-    explicit BlockParameter(Args&&... args)
-      : _current{std::forward<Args>(args)...}
-      , _old{_current}
-    {}
+  apf::BlockParameter<int> bp(111);
+  CHECK(111 == bp.get());
+  CHECK(111 == bp.get_old());
+  bp = 222;
+  CHECK(222 == bp.get());
+  CHECK(111 == bp.get_old());
+  bp = 333;
+  CHECK(333 == bp.get());
+  CHECK(222 == bp.get_old());
+}
 
-    template<typename Arg>
-    T& operator=(Arg&& arg)
-    {
-      _old = std::move(_current);
-      return _current = std::forward<Arg>(arg);
-    }
-
-    const T& get() const { return _current; }
-    const T& get_old() const { return _old; }
-
-  private:
-    T _current, _old;
-};
-
-} // namespace apf
-
-#endif
+} // TEST_CASE
 
 // Settings for Vim (http://www.vim.org/), please do not remove:
 // vim:softtabstop=2:shiftwidth=2:expandtab:textwidth=80:cindent

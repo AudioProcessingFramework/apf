@@ -17,6 +17,7 @@ TESTS += test_mimoprocessor
 TESTS += test_dual_iterator
 TESTS += test_discard_iterator
 TESTS += test_combine_channels
+TESTS += test_misc
 
 ifneq (,$(findstring $(MAKECMDGOALS), fftw clean))
 TESTS += test_fftwtools
