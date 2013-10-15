@@ -68,6 +68,8 @@ class BlockParameter
     const T& get() const { return _current; }
     const T& get_old() const { return _old; }
 
+    operator T() const { return this->get(); }
+
   private:
     T _current, _old;
 };

@@ -50,6 +50,16 @@ SECTION("int", "")
   CHECK(222 == bp.get_old());
 }
 
+SECTION("conversion operator", "")
+{
+  apf::BlockParameter<int> bp(42);
+  int i = 0;
+  CHECK(0 == i);
+  i = bp;
+  CHECK(42 == i);
+  CHECK((i - bp) == 0);
+}
+
 } // TEST_CASE
 
 // Settings for Vim (http://www.vim.org/), please do not remove:
