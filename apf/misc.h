@@ -70,6 +70,8 @@ class BlockParameter
 
     operator T() const { return this->get(); }
 
+    bool changed() const { return this->get() != this->get_old(); }
+
   private:
     T _current, _old;
 };

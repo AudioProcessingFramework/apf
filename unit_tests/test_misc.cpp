@@ -42,12 +42,15 @@ SECTION("int", "")
   apf::BlockParameter<int> bp(111);
   CHECK(111 == bp.get());
   CHECK(111 == bp.get_old());
+  CHECK_FALSE(bp.changed());
   bp = 222;
   CHECK(222 == bp.get());
   CHECK(111 == bp.get_old());
+  CHECK(bp.changed());
   bp = 333;
   CHECK(333 == bp.get());
   CHECK(222 == bp.get_old());
+  CHECK(bp.changed());
 }
 
 SECTION("conversion operator", "")
