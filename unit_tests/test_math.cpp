@@ -100,6 +100,24 @@ SECTION("rad2deg", "")
   CHECK(rad2deg(pi<long double>()) == 180.0l);
 }
 
+SECTION("wrap int", "")
+{
+  CHECK(wrap(-1, 7) == 6);
+  CHECK(wrap(0, 7) == 0);
+  CHECK(wrap(6, 7) == 6);
+  CHECK(wrap(7, 7) == 0);
+  CHECK(wrap(8, 7) == 1);
+}
+
+SECTION("wrap double", "")
+{
+  CHECK(wrap(-0.5, 360.0) == 359.5);
+  CHECK(wrap(0.0, 360.0) == 0.0);
+  CHECK(wrap(359.5, 360.0) == 359.5);
+  CHECK(wrap(360.0, 360.0) == 0.0);
+  CHECK(wrap(360.5, 360.0) == 0.5);
+}
+
 SECTION("next_power_of_2", "")
 {
   CHECK(next_power_of_2(-3) == 1);
