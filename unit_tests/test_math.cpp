@@ -118,6 +118,23 @@ SECTION("wrap double", "")
   CHECK(wrap(360.5, 360.0) == 0.5);
 }
 
+SECTION("wrap_two_pi", "")
+{
+#define WRAP_TWO_PI(type) \
+  CHECK(wrap_two_pi(-pi<type>()) == pi<type>()); \
+  CHECK(wrap_two_pi( pi<type>()) == pi<type>()); \
+  CHECK(wrap_two_pi(2 * pi<type>()) == 0.0); \
+  CHECK(wrap_two_pi(3 * pi<type>()) == pi<type>());
+
+  // TODO: use Approx, enable float and long double
+
+  WRAP_TWO_PI(double);
+  //WRAP_TWO_PI(float);
+  //WRAP_TWO_PI(long double);
+
+#undef WRAP_TWO_PI
+}
+
 SECTION("next_power_of_2", "")
 {
   CHECK(next_power_of_2(-3) == 1);

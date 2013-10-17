@@ -176,6 +176,14 @@ inline long double wrap(long double x, long double full)
   return fwrap(x, full);
 }
 
+template<typename T>
+inline T wrap_two_pi(T x)
+{
+  // local variable to avoid warning message about conversion
+  T two = 2;
+  return wrap(x, two * pi<T>());
+}
+
 /** Find a power of 2 which is >= a given number.
  * @param number number for which to find next power of 2
  * @return power of 2 above (or equal to) \b number 
