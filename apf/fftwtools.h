@@ -49,7 +49,7 @@ struct fftw<longtype> { \
   static void* malloc(size_t n) { return fftw ## shorttype ## malloc(n); } \
   static void free(void* p) { fftw ## shorttype ## free(p); } \
   static void destroy_plan(plan p) { \
-    fftw ## shorttype ## destroy_plan(p); p = 0; } \
+    fftw ## shorttype ## destroy_plan(p); p = nullptr; } \
   static void execute(const plan p) { fftw ## shorttype ## execute(p); } \
   static void execute_r2r(const plan p, longtype *in, longtype *out) { \
     fftw ## shorttype ## execute_r2r(p, in, out); } \
@@ -74,7 +74,7 @@ struct fftw_allocator
   typedef const T& const_reference;
   typedef T value_type;
 
-  pointer allocate(size_type n, const void* hint = 0)
+  pointer allocate(size_type n, const void* hint = nullptr)
   {
     (void)hint;
     return static_cast<pointer>(fftw<T>::malloc(sizeof(value_type) * n));

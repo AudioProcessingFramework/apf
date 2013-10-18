@@ -70,7 +70,7 @@ class SharedData<X>::SetCommand : public CommandQueue::Command
       : _pointer(pointer)
       , _data(data)
     {
-      assert(pointer != 0);
+      assert(pointer != nullptr);
     }
 
   private:

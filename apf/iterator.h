@@ -58,7 +58,7 @@ namespace apf
 {
 /// Check for null-pointer
 /// @return @b true if @p in != 0, else @b false
-template<typename T> bool no_nullptr(T* in) { return in != 0; }
+template<typename T> bool no_nullptr(T* in) { return in != nullptr; }
 
 /// Dummy overload for non-pointers
 /// @return Always @b true

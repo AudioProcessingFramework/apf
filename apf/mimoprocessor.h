@@ -437,7 +437,7 @@ APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
   , query_policy(params_.get("fifo_size", 128))
   , params(params_)
   , _fifo(params.get("fifo_size", 128))
-  , _current_list(0)
+  , _current_list(nullptr)
   , _num_threads(params.get("threads", APF_MIMOPROCESSOR_DEFAULT_THREADS))
   // Create worker threads.  NOTE: Number 0 is reserved for the main thread.
   , _thread_data(
@@ -537,7 +537,7 @@ class APF_MIMOPROCESSOR_BASE::Xput : public Item
     // You can add your own parameters by deriving from it.
     struct Params : parameter_map
     {
-      Params() : parent(0) {}
+      Params() : parent(nullptr) {}
       Derived* parent;
 
       Params& operator=(const parameter_map& p)

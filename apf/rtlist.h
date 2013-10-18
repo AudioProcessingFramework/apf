@@ -168,7 +168,7 @@ class RtList<T*>::AddCommand : public CommandQueue::Command
       : _splice_list(1, element) // make list with one element
       , _dst_list(dst_list)
     {
-      assert(element != 0);
+      assert(element != nullptr);
     }
 
     /// Constructor to add a bunch of items at once.

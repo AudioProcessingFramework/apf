@@ -159,7 +159,7 @@ class TransformBase
 };
 
 TransformBase::TransformBase(size_t block_size_)
-  : _fft_plan(0)
+  : _fft_plan(nullptr)
   , _block_size(block_size_)
   , _partition_size(2 * _block_size)
 {
@@ -554,7 +554,7 @@ OutputBase::_multiply_spectra()
   {
     const fft_node* filter = *ptr;
 
-    assert(filter != 0);
+    assert(filter != nullptr);
 
     if (input->zero || filter->zero) continue;
 
@@ -692,7 +692,7 @@ Output::rotate_queues()
     if (it->front()) *target = it->front();
 
     std::copy(it->begin() + 1, it->end(), it->begin());
-    *it->rbegin() = 0;
+    *it->rbegin() = nullptr;
   }
 }
 

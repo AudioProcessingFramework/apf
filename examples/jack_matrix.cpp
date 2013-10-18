@@ -86,7 +86,7 @@ class MatrixProcessor::m1_channel : public ProcessItem<m1_channel>
   public:
     struct Params
     {
-      Params() : input(0), part(0), part_size(0) {}
+      Params() : input(nullptr), part(0), part_size(0) {}
       Channel channel;
       const Input* input;
       int part, part_size;
@@ -127,7 +127,7 @@ class MatrixProcessor::m1_channel : public ProcessItem<m1_channel>
 
     APF_PROCESS(m1_channel, ProcessItem<m1_channel>)
     {
-      assert(_input != 0);
+      assert(_input != nullptr);
       Input::iterator begin = _input->begin() + _part * _part_size;
       std::copy(begin, begin + _part_size, _channel.begin());
     }

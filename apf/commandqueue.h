@@ -106,7 +106,7 @@ class CommandQueue : NonCopyable
     void cleanup_commands()
     {
       Command* cmd;
-      while ((cmd = _out_fifo.pop()) != 0) { _cleanup(cmd); }
+      while ((cmd = _out_fifo.pop()) != nullptr) { _cleanup(cmd); }
     }
 
     // TODO: avoid return value?
@@ -141,7 +141,7 @@ class CommandQueue : NonCopyable
     void process_commands()
     {
       Command* cmd;
-      while ((cmd = _in_fifo.pop()) != 0)
+      while ((cmd = _in_fifo.pop()) != nullptr)
       {
         cmd->execute();
         bool result = _out_fifo.push(cmd);
@@ -165,7 +165,7 @@ class CommandQueue : NonCopyable
     /// Clean up and delete a command @p cmd
     void _cleanup(Command* cmd)
     {
-      assert(cmd != 0);
+      assert(cmd != nullptr);
       cmd->cleanup();
       delete cmd;
     }

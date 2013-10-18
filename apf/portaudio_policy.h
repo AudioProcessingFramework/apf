@@ -85,14 +85,14 @@ class portaudio_policy
 
       inputParameters.channelCount = _next_input_id;
       inputParameters.device = _device_id;
-      inputParameters.hostApiSpecificStreamInfo = NULL;
+      inputParameters.hostApiSpecificStreamInfo = nullptr;
       inputParameters.sampleFormat = sample_format;
       inputParameters.suggestedLatency
         = 0; //Pa_GetDeviceInfo(_device_id)->defaultLowInputLatency ;
 
       outputParameters.channelCount = _next_output_id;
       outputParameters.device = _device_id;
-      outputParameters.hostApiSpecificStreamInfo = NULL;
+      outputParameters.hostApiSpecificStreamInfo = nullptr;
       outputParameters.sampleFormat = sample_format;
       outputParameters.suggestedLatency
         = 0; //Pa_GetDeviceInfo(_device_id)->defaultLowOutputLatency ;

@@ -101,7 +101,7 @@ SECTION("offset dereference", "a[n]")
 {
   Derived d(42);
 
-  Base* b[] = { 0, 0, &d };
+  Base* b[] = { nullptr, nullptr, &d };
 
   apf::cast_iterator<Derived, Base**> iter(b);
 

@@ -182,7 +182,7 @@ class JackClient
     {
       if (!jack_port_unregister(_client, port))
       {
-        port = 0; // port still points somewhere. Set to NULL.
+        port = nullptr; // port still points somewhere. Set to NULL.
         return true;
       }
       else
@@ -418,7 +418,7 @@ class JackClient
         , const std::string& destination
         , _pending_connections_t& pending_connections) const
     {
-      if (_client == 0) return false;
+      if (_client == nullptr) return false;
       int success = jack_connect(_client, source.c_str(), destination.c_str());
       switch (success)
       {
@@ -461,7 +461,7 @@ class JackClient
 JackClient::JackClient(const std::string& name
     , callback_usage_t callback_usage)
   : _client_name(name)
-  , _client(0)       // will be set after connecting to JACK
+  , _client(nullptr) // will be set after connecting to JACK
   , _sample_rate(0)  //             -- " -- 
   , _buffer_size(0)  //             -- " -- 
 {

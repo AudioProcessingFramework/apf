@@ -130,7 +130,7 @@ class posix_thread_policy::ScopedThread : public ThreadBase, NonCopyable
     static void* _thread_aux(void *arg)
     {
       static_cast<ScopedThread*>(arg)->_thread();
-      return 0;
+      return nullptr;
     }
 
     void _thread()
@@ -162,7 +162,7 @@ class posix_thread_policy::DetachedThread : public ThreadBase
     static void* _thread_aux(void* arg)
     {
       static_cast<DetachedThread*>(arg)->_thread();
-      return 0;
+      return nullptr;
     }
 
     void _thread()
@@ -185,7 +185,7 @@ class posix_thread_policy::Lock : NonCopyable
     // TODO: parameter: initial lock state?
     Lock()
     {
-      if (pthread_mutex_init(&_lock, NULL))
+      if (pthread_mutex_init(&_lock, nullptr))
       {
         throw std::runtime_error("Can't init mutex. (impossible !!!)");
       }

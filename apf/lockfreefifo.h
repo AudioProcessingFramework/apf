@@ -88,7 +88,7 @@ template<typename T>
 bool
 LockFreeFifo<T*>::push(T* item)
 {
-  if (item == 0) return false;
+  if (item == nullptr) return false;
 
   // Concurrent reading and writing is safe for one reader and writer. Once
   // the _read_index is read the _write_index won't change before reading 
@@ -119,7 +119,7 @@ template<typename T>
 T*
 LockFreeFifo<T*>::pop()
 {
-  if (this->empty()) return 0;
+  if (this->empty()) return nullptr;
 
   size_t r = _read_index;
 

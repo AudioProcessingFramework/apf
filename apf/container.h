@@ -155,7 +155,7 @@ class fixed_vector
     // In that case, the function signature doesn't change.
     template<typename In>
     fixed_vector(In first, In last, const Allocator& a = Allocator()
-        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = 0)
+        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = nullptr)
       : _allocator(a)
       , _capacity(0)
     {
@@ -199,9 +199,10 @@ class fixed_vector
     /// @param last Past-the-end iterator
     /// @pre capacity() must be 0!
     /// @throw . whatever allocate() throws
+    // TODO: in C++11, use std::enable_if as template argument
     template<typename In>
     void initialize(In first, In last
-        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = 0)
+        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = nullptr)
     {
       this->allocate(static_cast<size_type>(std::distance(first, last)));
 
