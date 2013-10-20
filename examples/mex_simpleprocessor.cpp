@@ -35,7 +35,7 @@
 #include <mex.h>
 #include <string>
 #include <vector>
-#include <memory>  // for std::auto_ptr
+#include <memory>  // for std::unique_ptr
 
 #ifdef MEX_USE_DOUBLE
 #define APF_MIMOPROCESSOR_SAMPLE_TYPE double
@@ -51,8 +51,8 @@
 // The single entry-point for Matlab is the function mexFunction(), see below!
 
 // global variables holding the state
-std::auto_ptr<SimpleProcessor> engine;
-int in_channels, out_channels, threads=1, block_size=64, sample_rate=44100;
+std::unique_ptr<SimpleProcessor> engine;
+mwSize in_channels, out_channels, threads=1, block_size=64, sample_rate=44100;
 typedef SimpleProcessor::sample_type sample_type;
 std::vector<sample_type*> inputs, outputs;
 
@@ -64,27 +64,27 @@ void engine_init(int nrhs, const mxArray* prhs[])
   }
   if (nrhs > 0)
   {
-    in_channels = *mxGetPr(prhs[0]);
+    in_channels = static_cast<mwSize>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    out_channels = *mxGetPr(prhs[0]);
+    out_channels = static_cast<mwSize>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    threads = *mxGetPr(prhs[0]);
+    threads = static_cast<mwSize>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    block_size = *mxGetPr(prhs[0]);
+    block_size = static_cast<mwSize>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    sample_rate = *mxGetPr(prhs[0]);
+    sample_rate = static_cast<mwSize>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
@@ -119,7 +119,7 @@ void engine_init(int nrhs, const mxArray* prhs[])
 
 void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-  if (!engine.get())
+  if (!engine)
   {
     mexErrMsgTxt("SimpleProcessor isn't initialized, use 'init' first!");
   }
@@ -127,11 +127,11 @@ void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
   {
     mexErrMsgTxt("Exactly one input and one output is needed!");
   }
-  if (mxGetM(prhs[0]) != block_size)
+  if (static_cast<mwSize>(mxGetM(prhs[0])) != block_size)
   {
     mexErrMsgTxt("Number of rows must be the same as block size!");
   }
-  if (mxGetN(prhs[0]) != in_channels)
+  if (static_cast<mwSize>(mxGetN(prhs[0])) != in_channels)
   {
     mexErrMsgTxt("Number of columns must be the same as number of inputs!");
   }

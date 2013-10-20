@@ -92,7 +92,7 @@ mex-double: mex
 .PHONY: mex mex-double
 
 %.mex: %.cpp
-	mkoctfile --mex $< $(CPPFLAGS)
+	CXXFLAGS="$(CXXFLAGS)" mkoctfile --mex $< $(CPPFLAGS)
 	$(RM) $*.o
 
 clean:
