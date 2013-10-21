@@ -68,7 +68,7 @@ class BlockParameter
     const T& get() const { return _current; }
     const T& get_old() const { return _old; }
 
-    operator T() const { return this->get(); }
+    operator const T&() const { return this->get(); }
 
     bool changed() const { return this->get() != this->get_old(); }
 
