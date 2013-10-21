@@ -54,8 +54,8 @@ class BlockParameter
   public:
     template<typename... Args>
     explicit BlockParameter(Args&&... args)
-      : _current{std::forward<Args>(args)...}
-      , _old{_current}
+      : _current{args...}
+      , _old{std::forward<Args>(args)...}
     {}
 
     template<typename Arg>

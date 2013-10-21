@@ -73,6 +73,52 @@ SECTION("conversion operator from const object", "")
   CHECK((i - bp) == 0);
 }
 
+struct NonCopyable
+{
+  NonCopyable(int) {};  // hypothetical constructor
+  NonCopyable(const NonCopyable&) = delete;
+  NonCopyable& operator=(NonCopyable&& other) = default;
+};
+
+SECTION("non-copyable T", "")
+{
+  // These are just compile-time checks:
+
+  apf::BlockParameter<NonCopyable> bp{42};
+  bp = NonCopyable(43);
+};
+
+struct CountCtors
+{
+  CountCtors() { ++ default_constructor; }
+  CountCtors(const CountCtors&) { ++ copy_constructor; }
+  CountCtors(CountCtors&&) { ++move_constructor; }
+
+  CountCtors& operator=(const CountCtors&) { ++copy_assignment; return *this; };
+  CountCtors& operator=(CountCtors&&) { ++move_assignment; return *this; };
+
+  int default_constructor = 0;
+  int copy_constructor = 0;
+  int move_constructor = 0;
+
+  int copy_assignment = 0;
+  int move_assignment = 0;
+};
+
+SECTION("check if move ctor and move assignment is used", "")
+{
+  apf::BlockParameter<CountCtors> bp{CountCtors()};
+  CHECK(bp.get().copy_constructor == 1);
+  CHECK(bp.get_old().move_constructor == 1);
+
+  bp = CountCtors();
+
+  CHECK(bp.get().move_assignment == 1);
+  CHECK(bp.get().copy_assignment == 0);
+  CHECK(bp.get_old().move_assignment == 1);
+  CHECK(bp.get_old().copy_assignment == 0);
+}
+
 } // TEST_CASE
 
 // Settings for Vim (http://www.vim.org/), please do not remove:
