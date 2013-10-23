@@ -687,7 +687,7 @@ class circular_iterator
     circular_iterator(I begin, I end, I current)
       : _begin(begin)
       , _end(end)
-      , _current(current)
+      , _current((current == end) ? begin : current)  // wrap around
     {
       assert(no_nullptr(_begin) && no_nullptr(_end) && no_nullptr(_current));
       assert(_begin != _end);
@@ -713,7 +713,7 @@ class circular_iterator
     /// @note The resulting iterator is of limited use, because there is only
     ///   one location where it will ever point to.
     ///   Let's call it a @em stagnant iterator.
-    circular_iterator(I begin)
+    explicit circular_iterator(I begin)
       : _begin(begin)
       , _end(begin + 1)
       , _current(begin)
@@ -816,6 +816,39 @@ class circular_iterator
     I _end;     ///< end of said range
     I _current; ///< current position in that range
 };
+
+/** Helper function to create a circular_iterator.
+ * The template parameter is optional because it can be inferred from the
+ * parameter(s). Example:
+ * @code make_circular_iterator(some_begin, some_end) @endcode
+ * @param some_begin the first iterator
+ * @param some_end past-the-end iterator
+ * @return a circular_iterator
+ * @ingroup apf_iterators
+ **/
+template<typename I>
+circular_iterator<I>
+make_circular_iterator(I begin, I end)
+{
+  return circular_iterator<I>(begin, end);
+}
+
+/** Helper function to create a circular_iterator.
+ * The template parameter is optional because it can be inferred from the
+ * parameter(s). Example:
+ * @code make_circular_iterator(some_begin, some_end, some_current) @endcode
+ * @param some_begin the first iterator
+ * @param some_end past-the-end iterator
+ * @param some_current current iterator
+ * @return a circular_iterator
+ * @ingroup apf_iterators
+ **/
+template<typename I>
+circular_iterator<I>
+make_circular_iterator(I begin, I end, I current)
+{
+  return circular_iterator<I>(begin, end, current);
+}
 
 /** Iterator adaptor with a function call at dereferenciation.
  * @tparam I type of base iterator

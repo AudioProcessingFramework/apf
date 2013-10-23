@@ -50,16 +50,18 @@ TEST_CASE("iterators/circular_iterator/2"
 int a[] = { 0, 1, 2 };
 ci iter1(&a[0], &a[3]);
 ci iter2(&a[0], &a[3], &a[1]);
+ci iter3(&a[0]);  // "useless" constructor
+ci iter4(&a[0], &a[3], &a[3]);  // wrapping, current == end -> current = begin
 
 SECTION("special constructors", "")
 {
   CHECK(iter1.base() == &a[0]);
   CHECK(iter2.base() == &a[1]);
+  CHECK(iter3.base() == &a[0]);
+  CHECK(iter4.base() == &a[0]);
 
-  // expected errors:
-  //ci iter3(&a[0]);  // not enough arguments
-  //ci iter3(&a[0], &a[0]);  // assertion, begin == end
-  //ci iter3(&a[0], &a[2], &a[2]);  // assertion, current == end
+  // expected error:
+  //ci iter5(&a[0], &a[0]);  // assertion, begin == end
 }
 
 SECTION("increment", "++a; a++")
@@ -148,56 +150,56 @@ SECTION("decrement", "--a; a--")
 
 SECTION("plus/minus", "a + n; n + a; a - n; a - b; a += n; a -= n")
 {
-  CHECK((iter1 + -9) == &a[0]);
-  CHECK((iter1 + -8) == &a[1]);
-  CHECK((iter1 + -7) == &a[2]);
-  CHECK((iter1 + -6) == &a[0]);
-  CHECK((iter1 + -5) == &a[1]);
-  CHECK((iter1 + -4) == &a[2]);
-  CHECK((iter1 + -3) == &a[0]);
-  CHECK((iter1 + -2) == &a[1]);
-  CHECK((iter1 + -1) == &a[2]);
-  CHECK((iter1 +  0) == &a[0]);
-  CHECK((iter1 +  1) == &a[1]);
-  CHECK((iter1 +  2) == &a[2]);
-  CHECK((iter1 +  3) == &a[0]);
-  CHECK((iter1 +  4) == &a[1]);
-  CHECK((iter1 +  5) == &a[2]);
-  CHECK((iter1 +  6) == &a[0]);
-  CHECK((iter1 +  7) == &a[1]);
-  CHECK((iter1 +  8) == &a[2]);
-  CHECK((iter1 +  9) == &a[0]);
+  CHECK((iter1 + -9).base() == &a[0]);
+  CHECK((iter1 + -8).base() == &a[1]);
+  CHECK((iter1 + -7).base() == &a[2]);
+  CHECK((iter1 + -6).base() == &a[0]);
+  CHECK((iter1 + -5).base() == &a[1]);
+  CHECK((iter1 + -4).base() == &a[2]);
+  CHECK((iter1 + -3).base() == &a[0]);
+  CHECK((iter1 + -2).base() == &a[1]);
+  CHECK((iter1 + -1).base() == &a[2]);
+  CHECK((iter1 +  0).base() == &a[0]);
+  CHECK((iter1 +  1).base() == &a[1]);
+  CHECK((iter1 +  2).base() == &a[2]);
+  CHECK((iter1 +  3).base() == &a[0]);
+  CHECK((iter1 +  4).base() == &a[1]);
+  CHECK((iter1 +  5).base() == &a[2]);
+  CHECK((iter1 +  6).base() == &a[0]);
+  CHECK((iter1 +  7).base() == &a[1]);
+  CHECK((iter1 +  8).base() == &a[2]);
+  CHECK((iter1 +  9).base() == &a[0]);
 
-  CHECK((iter1 -  9) == &a[0]);
-  CHECK((iter1 -  8) == &a[1]);
-  CHECK((iter1 -  7) == &a[2]);
-  CHECK((iter1 -  6) == &a[0]);
-  CHECK((iter1 -  5) == &a[1]);
-  CHECK((iter1 -  4) == &a[2]);
-  CHECK((iter1 -  3) == &a[0]);
-  CHECK((iter1 -  2) == &a[1]);
-  CHECK((iter1 -  1) == &a[2]);
-  CHECK((iter1 -  0) == &a[0]);
-  CHECK((iter1 - -1) == &a[1]);
-  CHECK((iter1 - -2) == &a[2]);
-  CHECK((iter1 - -3) == &a[0]);
-  CHECK((iter1 - -4) == &a[1]);
-  CHECK((iter1 - -5) == &a[2]);
-  CHECK((iter1 - -6) == &a[0]);
-  CHECK((iter1 - -7) == &a[1]);
-  CHECK((iter1 - -8) == &a[2]);
-  CHECK((iter1 - -9) == &a[0]);
+  CHECK((iter1 -  9).base() == &a[0]);
+  CHECK((iter1 -  8).base() == &a[1]);
+  CHECK((iter1 -  7).base() == &a[2]);
+  CHECK((iter1 -  6).base() == &a[0]);
+  CHECK((iter1 -  5).base() == &a[1]);
+  CHECK((iter1 -  4).base() == &a[2]);
+  CHECK((iter1 -  3).base() == &a[0]);
+  CHECK((iter1 -  2).base() == &a[1]);
+  CHECK((iter1 -  1).base() == &a[2]);
+  CHECK((iter1 -  0).base() == &a[0]);
+  CHECK((iter1 - -1).base() == &a[1]);
+  CHECK((iter1 - -2).base() == &a[2]);
+  CHECK((iter1 - -3).base() == &a[0]);
+  CHECK((iter1 - -4).base() == &a[1]);
+  CHECK((iter1 - -5).base() == &a[2]);
+  CHECK((iter1 - -6).base() == &a[0]);
+  CHECK((iter1 - -7).base() == &a[1]);
+  CHECK((iter1 - -8).base() == &a[2]);
+  CHECK((iter1 - -9).base() == &a[0]);
 
-  CHECK((0 + iter1) == &a[0]);
-  CHECK((1 + iter1) == &a[1]);
-  CHECK((2 + iter1) == &a[2]);
-  CHECK((3 + iter1) == &a[0]);
-  CHECK((4 + iter1) == &a[1]);
-  CHECK((5 + iter1) == &a[2]);
-  CHECK((6 + iter1) == &a[0]);
-  CHECK((7 + iter1) == &a[1]);
-  CHECK((8 + iter1) == &a[2]);
-  CHECK((9 + iter1) == &a[0]);
+  CHECK((0 + iter1).base() == &a[0]);
+  CHECK((1 + iter1).base() == &a[1]);
+  CHECK((2 + iter1).base() == &a[2]);
+  CHECK((3 + iter1).base() == &a[0]);
+  CHECK((4 + iter1).base() == &a[1]);
+  CHECK((5 + iter1).base() == &a[2]);
+  CHECK((6 + iter1).base() == &a[0]);
+  CHECK((7 + iter1).base() == &a[1]);
+  CHECK((8 + iter1).base() == &a[2]);
+  CHECK((9 + iter1).base() == &a[0]);
 
   CHECK((ci(&a[0], &a[3], &a[0]) - ci(&a[0], &a[3])) == 0);
   CHECK((ci(&a[0], &a[3], &a[1]) - ci(&a[0], &a[3])) == 1);
@@ -220,8 +222,7 @@ SECTION("plus/minus", "a + n; n + a; a - n; a - b; a += n; a -= n")
   iter1 -= 2;
   CHECK(iter1.base() == &a[0]);
 
-  ci iter3(&a[0]);  // "useless" constructor
-  CHECK((iter3 + 666) == &a[0]);
+  CHECK((iter3 + 666).base() == &a[0]);
 }
 
 SECTION("offset dereference", "a[n]")
@@ -241,6 +242,16 @@ SECTION("offset dereference", "a[n]")
   // can we also assign?
   iter1[-3] = 42;
   CHECK(a[0] == 42);
+}
+
+SECTION("make_circular_iterator", "")
+{
+  iter1 = apf::make_circular_iterator(&a[0], &a[3]);
+  CHECK(iter1.base() == &a[0]);
+  iter1 = apf::make_circular_iterator(&a[0], &a[3], &a[2]);
+  CHECK(iter1.base() == &a[2]);
+  iter1 = apf::make_circular_iterator(&a[0], &a[3], &a[3]);
+  CHECK(iter1.base() == &a[0]);
 }
 
 } // TEST_CASE
