@@ -434,9 +434,9 @@ class APF_MIMOPROCESSOR_BASE::thread_init_helper
 APF_MIMOPROCESSOR_TEMPLATES
 APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
   : interface_policy(params_)
-  , query_policy(params_.get("fifo_size", 128))
+  , query_policy(params_.get("fifo_size", 1024))
   , params(params_)
-  , _fifo(params.get("fifo_size", 128))
+  , _fifo(params.get("fifo_size", 1024))
   , _current_list(nullptr)
   , _num_threads(params.get("threads", APF_MIMOPROCESSOR_DEFAULT_THREADS))
   // Create worker threads.  NOTE: Number 0 is reserved for the main thread.
