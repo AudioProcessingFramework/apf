@@ -10,6 +10,9 @@
 #
 # For further customization you can also set the variables DEPENDENCY_EXT,
 # DEPENDENCY_DIR and NO_INCLUDE_DEPENDENCIES.
+#
+# To remove all temporary dependency files, run 'make clean'.
+# You can still define your own rule for the target 'clean', if needed.
 
 # Author: Matthias Geier, 2011
 
@@ -48,6 +51,8 @@ ifeq (,$(findstring $(MAKECMDGOALS), $(NO_INCLUDE_DEPENDENCIES)))
 -include $(DECORATED_DEPENDENCIES)
 endif
 
+# If a rule for 'clean' already exists, it is not overwritten here!
+# This merely adds a dependency on the target 'clean.dependencies':
 clean: clean.dependencies
 
 clean.dependencies:
