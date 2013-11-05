@@ -369,7 +369,6 @@ class MimoProcessor : public interface_policy
         WorkerThread& _thread;
     };
 
-    class thread_init_helper;
     class Xput;
 
     // This is called from the interface_policy
@@ -397,30 +396,10 @@ class MimoProcessor : public interface_policy
     /// Number of threads (main thread plus worker threads)
     const int _num_threads;
 
+    std::function<std::pair<int, MimoProcessor*>(int)> _thread_init_helper;
     fixed_vector<WorkerThread> _thread_data;
 
     rtlist_t _input_list, _output_list;
-};
-
-APF_MIMOPROCESSOR_TEMPLATES
-class APF_MIMOPROCESSOR_BASE::thread_init_helper
-{
-  public:
-    typedef std::pair<int, MimoProcessor*> result_type;
-
-    explicit thread_init_helper(MimoProcessor* parent)
-      : _parent(parent)
-    {
-      assert(_parent);
-    }
-
-    result_type operator()(int in)
-    {
-      return std::make_pair(in, _parent);
-    }
-
-  private:
-    MimoProcessor* _parent;
 };
 
 /// @throw std::logic_error if CommandQueue cannot be deactivated.
@@ -433,11 +412,12 @@ APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
   , _current_list(nullptr)
   , _num_threads(params.get("threads", APF_MIMOPROCESSOR_DEFAULT_THREADS))
   // Create worker threads.  NOTE: Number 0 is reserved for the main thread.
+  , _thread_init_helper([this] (int in) { return std::make_pair(in, this); })
   , _thread_data(
       make_transform_iterator(make_index_iterator(1)
-        , thread_init_helper(this)),
+        , _thread_init_helper),
       make_transform_iterator(make_index_iterator(_num_threads)
-        , thread_init_helper(this)))
+        , _thread_init_helper))
   , _input_list(_fifo)
   , _output_list(_fifo)
 {
