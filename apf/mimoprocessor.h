@@ -441,9 +441,9 @@ APF_MIMOPROCESSOR_BASE::_process_list(rtlist_t& l1, rtlist_t& l2)
 {
   // TODO: extend for more than two lists?
 
-  // WARNING: this is NOT conforming to the current C++ standard!
+  // Note: this was not conforming to C++03.
   // According to C++03 iterators to the spliced elements are invalidated!
-  // In C++1x this will be fixed.
+  // In C++11 this was fixed.
   // see http://stackoverflow.com/q/143156
 
   // see also http://stackoverflow.com/q/7681376
