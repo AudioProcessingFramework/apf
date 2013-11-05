@@ -30,11 +30,13 @@ $(DEPENDENCY_DIR):
 	mkdir -p $(DEPENDENCY_DIR)
 
 $(DEPENDENCY_DIR)/%.o.$(DEPENDENCY_EXT): %.cpp | $(DEPENDENCY_DIR)
-	@$(RM) $@; $(CXX) -MM -MF $@ -MT "$*.o $@" $(CPPFLAGS) $< > /dev/null
+	@$(RM) $@; $(CXX) -MM -MF $@ -MT "$*.o $@" \
+		$(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) $< > /dev/null
 	$(DEPENDENCY_MESSAGE)
 
 $(DEPENDENCY_DIR)/%.$(DEPENDENCY_EXT): %.cpp | $(DEPENDENCY_DIR)
-	@$(RM) $@; $(CXX) -MM -MF $@ -MT "$* $@" $(CPPFLAGS) $< > /dev/null
+	@$(RM) $@; $(CXX) -MM -MF $@ -MT "$* $@" \
+		$(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) $< > /dev/null
 	$(DEPENDENCY_MESSAGE)
 
 # other file types (e.g. *.c) could be added like this:
