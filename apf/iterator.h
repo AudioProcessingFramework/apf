@@ -29,7 +29,7 @@
 
 #include <cassert>  // for assert()
 #include <iterator>  // for std::iterator_traits, std::output_iterator_tag, ...
-#include <tr1/type_traits>  // for std::tr1::remove_reference
+#include <type_traits>  // for std::remove_reference, std::result_of
 
 #include "apf/math.h"  // for wrap()
 
@@ -852,9 +852,9 @@ make_circular_iterator(I begin, I end, I current)
 
 /** Iterator adaptor with a function call at dereferenciation.
  * @tparam I type of base iterator
- * @tparam F Unary function object with inner type @c result_type.
+ * @tparam F Unary function object which takes an @p I::value_type.
  *   Example: math::raised_cosine
- * @warning The @c result_type of @p F can be any type, but operator->() only
+ * @warning The result of @p F can be any type, but operator->() only
  *   works if it is a reference!
  *   If it's not a reference, you will get an error similar to this:
  *   @code error: lvalue required as unary ‘&’ operand @endcode
@@ -868,13 +868,15 @@ class transform_iterator
 {
   private:
     typedef transform_iterator self;
+    // NOTE: value_type& works for by-value, by-reference and by-const-reference
+    typedef F _signature(typename std::iterator_traits<I>::value_type&);
 
   public:
     typedef typename std::iterator_traits<I>::iterator_category
                                                               iterator_category;
     /// Can be a reference, but doesn't necessarily have to
-    typedef typename F::result_type reference;
-    typedef typename std::tr1::remove_reference<reference>::type value_type;
+    typedef typename std::result_of<_signature>::type reference;
+    typedef typename std::remove_reference<reference>::type value_type;
     typedef value_type* pointer;
     typedef typename std::iterator_traits<I>::difference_type difference_type;
 
@@ -893,7 +895,7 @@ class transform_iterator
     /// Arrow operator.
     /// Dereference the base iterator, use it as argument to the stored function
     /// and return the <em>address of the</em> result.
-    /// @warning Only works if @c F::result_type is a reference!
+    /// @warning Only works if the result of @p F is a reference!
     pointer operator->()
     {
       return &this->operator*();

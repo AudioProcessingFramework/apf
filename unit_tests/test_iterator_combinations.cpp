@@ -29,9 +29,6 @@
 
 struct three_halves
 {
-  typedef int argument_type;
-  typedef float result_type;
-
   float operator()(int in) { return static_cast<float>(in) * 1.5f; }
 };
 

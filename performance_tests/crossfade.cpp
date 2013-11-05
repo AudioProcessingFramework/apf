@@ -50,7 +50,6 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
 class MyProcessor::CombineFunction
 {
   public:
-    typedef float result_type;
     apf::CombineChannelsResult::type select(const Input&)
     {
       return apf::CombineChannelsResult::change;  // Always force crossfade

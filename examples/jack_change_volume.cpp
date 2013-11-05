@@ -74,9 +74,6 @@ class MyProcessor::Input : public MimoProcessorBase::DefaultInput
 class MyProcessor::CombineFunction
 {
   public:
-    // TODO somehow avoid specifying this type:
-    typedef float result_type;
-
     CombineFunction(size_t block_size) : _block_size(float(block_size)) {}
 
     apf::CombineChannelsResult::type select(const Input& in)

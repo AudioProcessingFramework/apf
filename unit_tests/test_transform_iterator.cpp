@@ -33,9 +33,6 @@
 
 struct three_halves
 {
-  typedef int argument_type;  // this is optional
-  typedef float result_type;  // this is necessary
-
   float operator()(int in) { return static_cast<float>(in) * 1.5f; }
 };
 
@@ -90,27 +87,88 @@ struct mystruct
   } innerobj;
 };
 
-struct special_function
+struct special_function1
 {
-  typedef mystruct::inner& result_type;
+  int operator()(mystruct s)
+  {
+    return s.innerobj.num;
+  }
+};
 
+struct special_function2
+{
+  // Note: mystruct&& doesn't work
   mystruct::inner& operator()(mystruct& s)
   {
     return s.innerobj;
   }
 };
 
-TEST_CASE("iterators/transform_iterator with strange function"
-    , "Test transform_iterator with a special function object")
+struct special_function3
+{
+  const mystruct::inner& operator()(const mystruct& s) const
+  {
+    return s.innerobj;
+  }
+};
+
+struct special_function4
+{
+  template<typename T>
+  int operator()(T&& s)
+  {
+    return s.innerobj.num;
+  }
+};
+
+TEST_CASE("iterators/transform_iterator with strange functions", "")
 {
 
-SECTION("only one section", "test special_function")
+mystruct x;
+
+SECTION("special_function1", "")
 {
-  mystruct x;
-  apf::transform_iterator<mystruct*, special_function>
-    it(&x, special_function());
+  apf::transform_iterator<mystruct*, special_function1>
+    it(&x, special_function1());
+  CHECK(*it == 42);
+}
+
+SECTION("special_function2", "")
+{
+  apf::transform_iterator<mystruct*, special_function2>
+    it(&x, special_function2());
   CHECK(&*it == &x.innerobj);
   CHECK(it->num == 42);
+}
+
+SECTION("special_function3", "")
+{
+  apf::transform_iterator<mystruct*, special_function3>
+    it(&x, special_function3());
+  CHECK(&*it == &x.innerobj);
+  CHECK(it->num == 42);
+}
+
+SECTION("special_function4", "")
+{
+  apf::transform_iterator<mystruct*, special_function4>
+    it(&x, special_function4());
+  CHECK(*it == 42);
+}
+
+SECTION("lambda functions", "")
+{
+  apf::transform_iterator<mystruct*, special_function4>
+    it(&x, special_function4());
+
+  CHECK(42 == *apf::make_transform_iterator(&x
+        , [] (mystruct s) { return s.innerobj.num; }));
+
+  CHECK(42 == *apf::make_transform_iterator(&x
+        , [] (mystruct& s) { return s.innerobj.num; }));
+
+  CHECK(42 == *apf::make_transform_iterator(&x
+        , [] (const mystruct& s) { return s.innerobj.num; }));
 }
 
 } // TEST_CASE
