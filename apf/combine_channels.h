@@ -32,8 +32,8 @@
 #include <stdexcept>  // for std::logic_error
 #include <algorithm>  // for std::transform(), std::copy(), std::fill()
 
-#include <tr1/functional>  // for std::tr1::bind()
-#include <tr1/type_traits>  // for std::tr1::remove_reference
+#include <functional>  // for std::bind()
+#include <type_traits>  // for std::remove_reference
 
 #include "apf/iterator.h" // for *_iterator, make_*_iterator(), cast_proxy_const
 
@@ -68,7 +68,7 @@ template<typename Derived, typename ListProxy, typename Out>
 class CombineChannelsBase
 {
   protected:
-    typedef typename std::iterator_traits<typename std::tr1::remove_reference<
+    typedef typename std::iterator_traits<typename std::remove_reference<
       ListProxy>::type::value_type::iterator>::value_type T;
 
   public:
@@ -96,7 +96,7 @@ class CombineChannelsBase
 
       static_cast<Derived*>(this)->before_the_loop();
 
-      for (typename std::tr1::remove_reference<ListProxy>::type::iterator item
+      for (typename std::remove_reference<ListProxy>::type::iterator item
           = _in.begin()
           ; item != _in.end()
           ; ++item)
@@ -438,13 +438,13 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
         {
           std::transform(item.begin(), item.end()
               , make_accumulating_iterator(this->_fade_out_buffer.begin())
-              , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
+              , std::bind(f, std::placeholders::_1, fade_out_tag()));
         }
         else
         {
           std::transform(item.begin(), item.end()
               , this->_fade_out_buffer.begin()
-              , std::tr1::bind(f, std::tr1::placeholders::_1, fade_out_tag()));
+              , std::bind(f, std::placeholders::_1, fade_out_tag()));
           _accumulate_fade_out = true;
         }
       }
