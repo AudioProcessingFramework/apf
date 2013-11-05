@@ -48,16 +48,17 @@ class SharedData
       // ... or maybe use swap() instead of assignment?
     }
 
-    const X& operator()() const { return _data; }
+    /// Get contained data. Use this if the conversion operator cannot be used.
+    const X& get() const { return _data; }
 
-    void operator()(const X& x)
+    operator const X&() const { return this->get(); }
+
+    void operator=(const X& rhs)
     {
-      _fifo.push(new SetCommand(&_data, x));
+      _fifo.push(new SetCommand(&_data, rhs));
     }
 
   private:
-    X& operator=(const X& rhs);  ///< disabled!
-
     CommandQueue& _fifo;
     X _data;
 };

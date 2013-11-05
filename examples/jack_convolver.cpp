@@ -58,9 +58,9 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
 
       if (!_convolver.queues_empty()) _convolver.rotate_queues();
 
-      if (this->reverb() != _old_reverb)
+      if (this->reverb != _old_reverb)
       {
-        if (this->reverb())
+        if (this->reverb)
         {
           _convolver.set_filter(_filter);
         }
@@ -68,7 +68,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
         {
           _convolver.set_filter(_dirac);
         }
-        _old_reverb = this->reverb();
+        _old_reverb = this->reverb;
       }
       float* result = _convolver.convolve();
 
@@ -156,13 +156,13 @@ int main(int argc, char *argv[])
     {
       if (reverb)
       {
-        processor.reverb(false);
+        processor.reverb = false;
         reverb = false;
         std::cout << "filter off" << std::endl;
       }
       else
       {
-        processor.reverb(true);
+        processor.reverb = true;
         reverb = true;
         std::cout << "filter on" << std::endl;
       }

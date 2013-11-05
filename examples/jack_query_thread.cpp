@@ -62,7 +62,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
 
         void query()
         {
-          _ch = _parent.ch();
+          _ch = _parent.ch;
         }
 
         void update()
@@ -84,13 +84,13 @@ int main()
   processor.activate();
   processor.start_querying();
   sleep(3);
-  processor.ch('*');
+  processor.ch = '*';
   sleep(1);
-  processor.ch('+');
+  processor.ch = '+';
   sleep(1);
-  processor.ch('#');
+  processor.ch = '#';
   sleep(1);
-  processor.ch('.');
+  processor.ch = '.';
   sleep(1);
   processor.deactivate();
   std::cout << std::endl;

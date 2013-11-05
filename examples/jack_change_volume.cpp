@@ -57,15 +57,15 @@ class MyProcessor::Input : public MimoProcessorBase::DefaultInput
   public:
     explicit Input(const Params& p)
       : MimoProcessorBase::DefaultInput(p)
-      , weight(this->parent.volume())
-      , old_weight(this->parent.volume())
+      , weight(this->parent.volume)
+      , old_weight(this->parent.volume)
     {}
 
     APF_PROCESS(Input, MimoProcessorBase::DefaultInput)
     {
       // In real-life applications, this will be more complicated:
       this->old_weight = this->weight;
-      this->weight = this->parent.volume();
+      this->weight = this->parent.volume;
     }
 
     float weight, old_weight;
@@ -194,7 +194,7 @@ int main()
   for (;;)
   {
     std::cout << volume << std::endl;
-    processor.volume(volume);
+    processor.volume = volume;
 
     std::getline(std::cin, input);
     if (input == "+")
