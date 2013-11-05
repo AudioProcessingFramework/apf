@@ -408,13 +408,6 @@ class APF_MIMOPROCESSOR_BASE::thread_init_helper
   public:
     typedef std::pair<int, MimoProcessor*> result_type;
 
-    // TODO: remove once std::is_convertible from C++11 is used in container.h:
-    thread_init_helper()
-    {
-      throw std::logic_error(
-          "Bug: default ctor. of thread_init_helper may never be called!");
-    }
-
     explicit thread_init_helper(MimoProcessor* parent)
       : _parent(parent)
     {

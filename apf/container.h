@@ -69,24 +69,6 @@ namespace apf
 template<typename T, typename Allocator = std::allocator<T> >
 class fixed_vector
 {
-  private:
-    // TODO: In C++11 there is std::enable_if and std::is_convertible!
-    template <bool, typename X = void> struct _enable_if {};
-    template <typename X> struct _enable_if<true, X> { typedef X type; };
-
-    template <typename From, typename To>
-    struct _is_convertible
-    {
-      private:
-        struct _true { char dummy[2]; };
-        struct _false {};
-        static _true _check(const To&);
-        static _false _check(...);
-
-      public:
-        static const bool value = (sizeof(_true) == sizeof(_check(From())));
-    };
-
   public:
     // note: in C++11 there is an allocator_traits class.
 
@@ -149,13 +131,9 @@ class fixed_vector
 
     /// Constructor from sequence. The sequence is not copied but rather used as
     /// constructor arguments for the new Ts.
-    // TODO: In C++11 it's nicer to disable with a template argument:
-    // template<typename InputIterator, typename = typename
-    //   enable_if<!is_convertible<InputIterator, size_t>::value>::type>
-    // In that case, the function signature doesn't change.
-    template<typename In>
-    fixed_vector(In first, In last, const Allocator& a = Allocator()
-        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = nullptr)
+    template<typename In, typename = typename
+      std::enable_if<!std::is_convertible<In, size_t>::value>::type>
+    fixed_vector(In first, In last, const Allocator& a = Allocator())
       : _allocator(a)
       , _capacity(0)
     {
@@ -199,10 +177,9 @@ class fixed_vector
     /// @param last Past-the-end iterator
     /// @pre capacity() must be 0!
     /// @throw . whatever allocate() throws
-    // TODO: in C++11, use std::enable_if as template argument
-    template<typename In>
-    void initialize(In first, In last
-        , typename _enable_if<!_is_convertible<In, size_t>::value>::type* = nullptr)
+    template<typename In, typename = typename
+      std::enable_if<!std::is_convertible<In, size_t>::value>::type>
+    void initialize(In first, In last)
     {
       this->allocate(static_cast<size_type>(std::distance(first, last)));
 
