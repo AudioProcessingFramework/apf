@@ -203,51 +203,15 @@ class fixed_vector
     }
 
     /// Initialize a new item if reserved memory is available.
-    /// @param arg Argument passed to the constructor of @p T
+    /// @param args Arguments passed to the constructor of @p T
     /// @pre Enough memory must have been reserved with allocate().
     /// @throw std::out_of_range if not enough memory was reserved
-    template<typename Arg>
-    void emplace_back(const Arg& arg)
-    {
-      if (_size < _capacity)
-      {
-        new (_data + _size) T(arg);
-        ++_size;
-      }
-      else
-      {
-        throw std::out_of_range(
-            "fixed_vector::emplace_back(): capacity exceeded!");
-      }
-    }
-
-    // TODO: emplace_back() with 2 arguments (or variadic template version)
-
-#if 0
-    // in C++11 this can be simplified with variadic templates:
-
     template<typename... Args>
     void emplace_back(Args&&... args)
     {
       if (_size < _capacity)
       {
         new (_data + _size) T(args...);
-        ++_size;
-      }
-      else
-      {
-        throw std::out_of_range(
-            "fixed_vector::emplace_back(): capacity exceeded!");
-      }
-    }
-#endif
-
-    template<typename Arg1, typename Arg2, typename Arg3>
-    void emplace_back(const Arg1& arg1, const Arg2& arg2, const Arg3& arg3)
-    {
-      if (_size < _capacity)
-      {
-        new (_data + _size) T(arg1, arg2, arg3);
         ++_size;
       }
       else
