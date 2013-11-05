@@ -172,7 +172,7 @@ BlockDelayLine<T>::read_block(Iterator destination, size_type delay, T weight)
   if (!this->delay_is_valid(delay)) return false;
   circulator source = this->get_read_circulator(delay);
   std::transform(source, source + _block_size, destination
-      , std::bind2nd(std::multiplies<T>(), weight));
+      , std::bind(std::multiplies<T>(), std::placeholders::_1, weight));
   return true;
 }
 

@@ -26,7 +26,7 @@
 // APF_MIMOPROCESSOR_*_POLICY.
 
 #include <algorithm>  // for std::transform()
-#include <functional> // for std::multiplies(), std::bind2nd()
+#include <functional> // for std::multiplies(), std::bind()
 
 #include "apf/mimoprocessor.h"
 #include "apf/combine_channels.h"  // for CombineChannels

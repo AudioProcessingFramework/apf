@@ -455,7 +455,7 @@ OutputBase::convolve(float weight)
     // normalize buffer (fftw3 does not do this)
     const float norm = weight / float(_partition_size);
     std::transform(second_half, _output_buffer.end(), second_half
-        , std::bind1st(std::multiplies<float>(), norm));
+        , std::bind(std::multiplies<float>(), norm, std::placeholders::_1));
   }
   return second_half;
 }
@@ -791,7 +791,7 @@ void transform_nested(const Filter& in1, const Filter& in2, Filter& out
       {
         assert(it2->size() == it3->size());
         std::transform(it2->begin(), it2->end(), it3->begin()
-            , std::bind1st(f, 0));
+            , std::bind(f, 0, std::placeholders::_1));
         it3->zero = false;
       }
     }
@@ -801,7 +801,7 @@ void transform_nested(const Filter& in1, const Filter& in2, Filter& out
       {
         assert(it1->size() == it3->size());
         std::transform(it1->begin(), it1->end(), it3->begin()
-            , std::bind2nd(f, 0));
+            , std::bind(f, std::placeholders::_1, 0));
         it3->zero = false;
       }
       else
