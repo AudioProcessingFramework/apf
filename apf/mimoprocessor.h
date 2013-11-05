@@ -448,7 +448,7 @@ APF_MIMOPROCESSOR_BASE::_process_list(rtlist_t& l1, rtlist_t& l2)
 
   // see also http://stackoverflow.com/q/7681376
 
-  rtlist_iterator temp = l2.begin();
+  auto temp = l2.begin();
   l2.splice(temp, l1);  // join lists: "L2 = L1 + L2"
   _process_list(l2);
   l1.splice(l1.end(), l2, l2.begin(), temp);  // restore original lists
@@ -463,13 +463,12 @@ APF_MIMOPROCESSOR_BASE::_process_selected_items_in_current_list(int thread_numbe
   assert(_current_list);
 
   int n = 0;
-  for (rtlist_iterator i = _current_list->begin()
-      ; i != _current_list->end()
-      ; ++i, ++n)
+  for (auto& i: *_current_list)
   {
-    if (thread_number == n % _num_threads)
+    if (thread_number == n++ % _num_threads)
     {
-      (*i)->process();
+      assert(i);
+      i->process();
     }
   }
 }
@@ -481,24 +480,18 @@ APF_MIMOPROCESSOR_BASE::_process_current_list_in_main_thread()
   assert(_current_list);
   if (_current_list->empty()) return;
 
-  typedef typename fixed_vector<WorkerThread>::iterator thread_iterator;
-
   // wake all threads
-  for (thread_iterator it = _thread_data.begin()
-      ; it != _thread_data.end()
-      ; ++it)
+  for (auto& it: _thread_data)
   {
-    it->cont_semaphore.post();
+    it.cont_semaphore.post();
   }
 
   _process_selected_items_in_current_list(0);
 
   // wait for worker threads
-  for (thread_iterator it = _thread_data.begin()
-      ; it != _thread_data.end()
-      ; ++it)
+  for (auto& it: _thread_data)
   {
-    it->wait_semaphore.wait();
+    it.wait_semaphore.wait();
   }
 }
 
