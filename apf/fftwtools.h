@@ -29,6 +29,7 @@
 
 #include <fftw3.h>
 
+#include <utility>  // for std::forward
 #include <limits>  // for std::numeric_limits
 
 namespace apf
@@ -56,11 +57,25 @@ struct fftw<longtype> { \
   static plan plan_r2r_1d(int n, longtype* in, longtype* out \
       , fftw_r2r_kind kind, unsigned flags) { \
     return fftw ## shorttype ## plan_r2r_1d(n, in, out, kind, flags); } \
+  class scoped_plan { \
+    public: \
+      template<typename Func, typename... Args> \
+      scoped_plan(Func func, Args... args) \
+        : _plan(func(std::forward<Args>(args)...)), _owning(true) {} \
+      scoped_plan(scoped_plan&& other) \
+        : _plan(std::move(other._plan)), _owning(true) { \
+        other._owning = false; } \
+      ~scoped_plan() { if (_owning) destroy_plan(_plan); } \
+      operator const plan&() { return _plan; } \
+    private: \
+      plan _plan; bool _owning; }; \
 };
 
 APF_FFTW_TRAITS(float, f_)
 APF_FFTW_TRAITS(double, _)
 APF_FFTW_TRAITS(long double, l_)
+
+#undef APF_FFTW_TRAITS
 
 /// @note: This only works for containers with contiguous memory (e.g. vector)!
 template<typename T>
