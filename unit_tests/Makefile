@@ -2,20 +2,21 @@
 
 TESTS += test_math
 TESTS += test_stringtools
+TESTS += test_trivial_iterator
+TESTS += test_iterator
 TESTS += test_accumulating_iterator
 TESTS += test_cast_iterator
 TESTS += test_circular_iterator
 TESTS += test_transform_iterator
 TESTS += test_index_iterator
 TESTS += test_stride_iterator
+TESTS += test_dual_iterator
+TESTS += test_discard_iterator
 TESTS += test_iterator_combinations
 TESTS += test_biquad
 TESTS += test_blockdelayline
 TESTS += test_container
-TESTS += test_iterator
 TESTS += test_mimoprocessor
-TESTS += test_dual_iterator
-TESTS += test_discard_iterator
 TESTS += test_combine_channels
 TESTS += test_misc
 
