@@ -48,7 +48,7 @@ class BlockDelayLine : apf::NonCopyable
     typedef fixed_vector<T> data_t;
 
   public:
-    typedef size_t size_type;
+    typedef typename data_t::size_type size_type;
     typedef typename data_t::pointer pointer;
     typedef apf::circular_iterator<typename data_t::iterator> circulator;
 
@@ -84,7 +84,6 @@ class BlockDelayLine : apf::NonCopyable
     /// Get a circular iterator to the sample with time 0
     circulator _get_data_circulator() const { return _data_circulator; }
 
-    // TODO: use signed data type?
     const size_type _block_size;  ///< Size of read/write blocks
 
   private:
@@ -109,7 +108,6 @@ template<typename T>
 BlockDelayLine<T>::BlockDelayLine(size_type block_size, size_type max_delay)
   : _block_size(block_size)
   , _max_delay(max_delay)
-  // Calculation is done in ctor because _number_of_blocks is const.
   // Minimum number of blocks is 2, even if _max_delay is 0.
   // With only one block the circular iterators r and (r + _block_size) would be
   // equal and the read...() functions wouldn't work.
@@ -124,8 +122,7 @@ BlockDelayLine<T>::BlockDelayLine(size_type block_size, size_type max_delay)
 }
 
 /** Write a block of data to the delay line.
- * Before writing, the read and write pointers are advanced to the next
- * block.
+ * Before writing, the read and write pointers are advanced to the next block.
  * If you don't want to use this function, you can also call advance(), get the
  * write pointer with get_write_pointer() and write directly to it.
  * @param source Pointer/iterator where the block of data shall be
@@ -172,7 +169,7 @@ BlockDelayLine<T>::read_block(Iterator destination, size_type delay, T weight)
   if (!this->delay_is_valid(delay)) return false;
   circulator source = this->get_read_circulator(delay);
   std::transform(source, source + _block_size, destination
-      , std::bind(std::multiplies<T>(), std::placeholders::_1, weight));
+      , [weight] (T in) { return in * weight; });
   return true;
 }
 
