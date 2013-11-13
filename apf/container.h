@@ -75,7 +75,7 @@ namespace internal
  * - reserve() and emplace_back() have different semantics.
  * - all other functions which (potentially) change size are disabled.
  **/
-template<typename T, typename Allocator = std::allocator<T> >
+template<typename T, typename Allocator = std::allocator<T>>
 class fixed_vector : public std::vector<T, Allocator>
 {
   private:
@@ -303,7 +303,7 @@ class fixed_list : public std::list<T, Allocator>
  *
  * @tparam T Type of stored data
  **/
-template<typename T, typename Allocator = std::allocator<T> >
+template<typename T, typename Allocator = std::allocator<T>>
 class fixed_matrix : public fixed_vector<T, Allocator>
 {
   private:

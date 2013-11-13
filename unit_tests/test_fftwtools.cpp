@@ -39,17 +39,17 @@ TEST_CASE("fftw_allocator", "Test fftw_allocator")
 
 SECTION("stuff", "")
 {
-  std::vector<float, apf::fftw_allocator<float> > vf;
+  std::vector<float, apf::fftw_allocator<float>> vf;
   vf.push_back(3.1415f);
 
   CHECK(vf.front() == 3.1415f);
 
-  std::vector<double, apf::fftw_allocator<double> > vd;
-  std::vector<long double, apf::fftw_allocator<long double> > vl;
+  std::vector<double, apf::fftw_allocator<double>> vd;
+  std::vector<long double, apf::fftw_allocator<long double>> vl;
 
-  apf::fixed_vector<float, apf::fftw_allocator<float> > ff(42);
-  apf::fixed_vector<double, apf::fftw_allocator<double> > fd(42);
-  apf::fixed_vector<long double, apf::fftw_allocator<long double> > fl(42);
+  apf::fixed_vector<float, apf::fftw_allocator<float>> ff(42);
+  apf::fixed_vector<double, apf::fftw_allocator<double>> fd(42);
+  apf::fixed_vector<long double, apf::fftw_allocator<long double>> fl(42);
 
   CHECK(is16bytealigned(&vf.front()));
   CHECK(is16bytealigned(&ff.front()));

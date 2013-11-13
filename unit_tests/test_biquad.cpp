@@ -42,8 +42,8 @@ SECTION("basic", "only instantiations and very basic stuff")
 
   CHECK(a.b0 == 0.1);
 
-  apf::Cascade<apf::BiQuad<double> > d(25);
-  apf::Cascade<apf::BiQuad<float> > e(25);
+  apf::Cascade<apf::BiQuad<double>> d(25);
+  apf::Cascade<apf::BiQuad<float>> e(25);
 }
 
 } // TEST_CASE

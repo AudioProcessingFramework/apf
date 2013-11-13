@@ -473,7 +473,7 @@ template<typename T>
 class raised_cosine_fade
 {
   private:
-    typedef transform_iterator<index_iterator<T>, math::raised_cosine<T> >
+    typedef transform_iterator<index_iterator<T>, math::raised_cosine<T>>
       iterator_type;
 
   public:

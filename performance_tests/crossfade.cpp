@@ -84,7 +84,7 @@ class MyProcessor::Output : public MimoProcessorBase::DefaultOutput
 
   private:
     apf::CombineChannelsCrossfade<rtlist_proxy<Input>, Output
-      , apf::raised_cosine_fade<float> > _combine_and_crossfade;
+      , apf::raised_cosine_fade<float>> _combine_and_crossfade;
 };
 
 MyProcessor::MyProcessor(const apf::parameter_map& p)

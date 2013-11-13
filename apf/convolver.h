@@ -65,7 +65,7 @@ static size_t min_partitions(size_t block_size, size_t filter_size)
 struct fft_node : fixed_vector<float, fftw_allocator<float>>
 {
   explicit fft_node(size_t n)
-    : fixed_vector<float, fftw_allocator<float> >(n)
+    : fixed_vector<float, fftw_allocator<float>>(n)
     , zero(true)
   {}
 

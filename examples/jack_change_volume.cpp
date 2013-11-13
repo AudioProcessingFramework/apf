@@ -149,7 +149,7 @@ class MyProcessor::Output : public MimoProcessorBase::DefaultOutput
     apf::CombineChannelsInterpolation<rtlist_proxy<Input>, Output>
       _combine_and_interpolate;
     apf::CombineChannelsCrossfade<rtlist_proxy<Input>, Output
-      , apf::raised_cosine_fade<float> > _combine_and_crossfade;
+      , apf::raised_cosine_fade<float>> _combine_and_crossfade;
     CombineFunction _combine_function;
 };
 

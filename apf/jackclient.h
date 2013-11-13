@@ -411,7 +411,7 @@ class JackClient
       return static_cast<JackClient*>(arg)->jack_xrun_callback();
     }
 
-    typedef std::vector<std::pair<std::string, std::string> >
+    typedef std::vector<std::pair<std::string, std::string>>
       _pending_connections_t;
 
     bool _connect_ports_helper(const std::string& source
