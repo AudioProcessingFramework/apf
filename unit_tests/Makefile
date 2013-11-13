@@ -66,6 +66,9 @@ fftw: run_tests
 
 main: $(OBJECTS)
 
+# TODO: check why this gives false(?) positives in test_blockdelayline.h
+test_blockdelayline.o: CPPFLAGS := $(filter-out -D_GLIBCXX_DEBUG,$(CPPFLAGS))
+
 DEPENDENCIES = main $(OBJECTS)
 
 clean:

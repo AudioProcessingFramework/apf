@@ -27,6 +27,7 @@
 #ifndef APF_MIMOPROCESSOR_H
 #define APF_MIMOPROCESSOR_H
 
+#include <vector>
 #include <cassert>  // for assert()
 #include <stdexcept>  // for std::logic_error
 
@@ -34,7 +35,6 @@
 #include "apf/parameter_map.h"
 #include "apf/misc.h"  // for NonCopyable
 #include "apf/iterator.h" // for *_iterator, make_*_iterator(), cast_proxy_const
-#include "apf/container.h"  // for fixed_vector
 
 #define APF_MIMOPROCESSOR_TEMPLATES template<typename Derived, typename interface_policy, typename thread_policy, typename query_policy>
 #define APF_MIMOPROCESSOR_BASE MimoProcessor<Derived, interface_policy, thread_policy, query_policy>
@@ -127,7 +127,7 @@ class MimoProcessor : public interface_policy
     /// Abstract base class for list items.
     struct Item : NonCopyable
     {
-      virtual ~Item() {}
+      virtual ~Item() = default;
 
       /// to be overwritten in the derived class
       virtual void process() = 0;
@@ -397,7 +397,7 @@ class MimoProcessor : public interface_policy
     const int _num_threads;
 
     std::function<std::pair<int, MimoProcessor*>(int)> _thread_init_helper;
-    fixed_vector<WorkerThread> _thread_data;
+    std::vector<WorkerThread> _thread_data;
 
     rtlist_t _input_list, _output_list;
 };

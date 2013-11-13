@@ -27,14 +27,21 @@
 
 #include "catch/catch.hpp"
 
-class NonCopyable
+struct NonCopyableButMovable
 {
-  public:
-    NonCopyable() {}
+  explicit NonCopyableButMovable(int x_ = 666) : x(x_) {}
+  NonCopyableButMovable(NonCopyableButMovable&&) = default;
 
-  private:
-    NonCopyable(const NonCopyable&);
-    NonCopyable& operator=(const NonCopyable&);
+  NonCopyableButMovable(const NonCopyableButMovable&) = delete;
+  NonCopyableButMovable& operator=(const NonCopyableButMovable&) = delete;
+
+  int x;
+};
+
+struct mystruct
+{
+  mystruct(int one, int two) : first(one), second(two) {}
+  int first, second;
 };
 
 TEST_CASE("fixed_vector", "Test fixed_vector")
@@ -44,9 +51,18 @@ SECTION("default constructor", "")
 {
   apf::fixed_vector<int> fv;
   CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 0);
 }
 
-SECTION("first constructor", "")
+SECTION("default constructor and allocator", "")
+{
+  auto a = std::allocator<int>();
+  apf::fixed_vector<int> fv(a);
+  CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 0);
+}
+
+SECTION("constructor from size", "uses default constructor")
 {
   apf::fixed_vector<int> fv(3);
   CHECK(fv[1] == 0);
@@ -55,39 +71,82 @@ SECTION("first constructor", "")
   CHECK(fv2.size() == 0);
 }
 
-SECTION("second constructor", "")
+SECTION("constructor from size and allocator", "")
 {
-  apf::fixed_vector<int> fv(3ul, 99);
+  auto a = std::allocator<int>();
+
+  apf::fixed_vector<int> fv(3, a);
+  CHECK(fv[2] == 0);
+
+  CHECK(apf::fixed_vector<int>(0, a).size() == 0);
+
+  // rvalue allocator
+  CHECK(apf::fixed_vector<int>(0, std::allocator<int>()).size() == 0);
+}
+
+SECTION("constructor from size and default value", "")
+{
+  apf::fixed_vector<int> fv(3, 99);
+
+  CHECK(fv[2] == 99);
+}
+
+SECTION("constructor from size and default value and allocator", "")
+{
+  auto a = std::allocator<int>();
+
+  apf::fixed_vector<int> fv(3, 99, a);
 
   CHECK(fv[2] == 99);
 
-  apf::fixed_vector<int> fv2(3, 99);
+  // rvalue allocator
+  CHECK(apf::fixed_vector<int>(3, 99, std::allocator<int>())[2] == 99);
 }
 
-SECTION("another constructor", "")
+SECTION("constructor from size and initializer arguments", "")
 {
-  apf::fixed_vector<int> fv(std::make_pair(3ul, 99));
+  apf::fixed_vector<mystruct> fv(3, 4, 5);
+  CHECK(fv[2].second == 5);
+}
+
+SECTION("copy constructor", "")
+{
+  apf::fixed_vector<int> fv(3, 99);
+  apf::fixed_vector<int> fv2(fv);
+  CHECK(fv[2] == 99);
+  CHECK(fv2[2] == 99);
+}
+
+SECTION("move constructor", "")
+{
+  apf::fixed_vector<int> fv(apf::fixed_vector<int>(3, 99));
 
   CHECK(fv[2] == 99);
 }
 
-SECTION("yet another constructor and more", "")
+SECTION("constructor from initializer list", "")
 {
-  int data[] = { 1, 2, 3, 4 };
-  apf::fixed_vector<int> fv(data, data+4);
+  apf::fixed_vector<int> fv{42};
+  CHECK(fv.size() == 1);
+  CHECK(fv[0] == 42);
+
+  // Note: extra parentheses because of commas
+  CHECK((apf::fixed_vector<int>{42, 43}.size()) == 2);
+  CHECK((apf::fixed_vector<int>{42, 43, 44}.size()) == 3);
+}
+
+const int size = 4;
+int data[size] = { 1, 2, 3, 4 };
+
+SECTION("constructor from range", "")
+{
+  apf::fixed_vector<int> fv(data, data+size);
   CHECK(fv[1] == 2);
   fv[1] = 100;
   CHECK(fv[1] == 100);
 
   CHECK(*fv.begin() == 1);
-
-  const apf::fixed_vector<int> cfv(data, data+4);
-
-  CHECK(*cfv.begin() == 1);
-  CHECK(cfv[2] == 3);
-
   CHECK(*fv.rbegin() == 4);
-  CHECK(*cfv.rbegin() == 4);
 
   CHECK(fv.size() == 4);
   CHECK_FALSE(fv.empty());
@@ -96,68 +155,65 @@ SECTION("yet another constructor and more", "")
   CHECK(fv.back() == 4);
 }
 
-SECTION("empty()", "not really useful ...")
+SECTION("constructor from range (const)", "")
 {
-  apf::fixed_vector<int> fv(0);
-  CHECK(fv.empty());
+  const apf::fixed_vector<int> fv(data, data+4);
+
+  CHECK(*fv.begin() == 1);
+  CHECK(fv[2] == 3);
+
+  CHECK(*fv.rbegin() == 4);
+
+  CHECK(fv.size() == 4);
+  CHECK_FALSE(fv.empty());
+
+  CHECK(fv.front() == 1);
+  CHECK(fv.back() == 4);
 }
 
-apf::fixed_vector<int> default_fv;
-
-SECTION("allocate(), emplace_back()", "")
+SECTION("reserve() and emplace_back()", "")
 {
-  CHECK(default_fv.empty());
-  default_fv.allocate(2);
-  CHECK(default_fv.empty());
-  default_fv.emplace_back(1);
-  CHECK(default_fv.size() == 1);
-  CHECK(default_fv[0] == 1);
-  default_fv.emplace_back(2);
-  CHECK(default_fv[1] == 2);
-  CHECK_THROWS_AS(default_fv.emplace_back(666), std::out_of_range);
+  apf::fixed_vector<int> fv;
+  CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 0);
+
+  CHECK_THROWS_AS(fv.emplace_back(666), std::logic_error);
+
+  fv.reserve(1);
+  CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 1);
+
+  fv.emplace_back(1);
+  CHECK(fv[0] == 1);
+
+  CHECK_THROWS_AS(fv.emplace_back(666), std::logic_error);
+
+  CHECK_THROWS_AS(fv.reserve(42), std::logic_error);
 }
 
-SECTION("initialize()", "")
+SECTION("fixed_vector of non-copyable type", "")
 {
-  CHECK(default_fv.size() == 0);
+  apf::fixed_vector<NonCopyableButMovable> fv(1000);
+  CHECK(fv[999].x == 666);
 
-  default_fv.initialize(0);
-  CHECK(default_fv.size() == 0);
-
-  default_fv.initialize(5);
-  CHECK(default_fv.size() == 5);
-
-  CHECK_THROWS_AS(default_fv.initialize(0), std::logic_error);
+  apf::fixed_vector<NonCopyableButMovable> fv2(1000, 42);
+  CHECK(fv2[999].x == 42);
 }
 
-SECTION("initialize() 2", "")
+SECTION("fixed_vector of non-copyable type, emplace_back()", "")
 {
-  CHECK(default_fv.size() == 0);
+  apf::fixed_vector<NonCopyableButMovable> fv;
+  CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 0);
 
-  default_fv.initialize(2ul, 4);
-  CHECK(default_fv.size() == 2);
-  CHECK(default_fv[0] == 4);
-  CHECK(default_fv[1] == 4);
-}
+  fv.reserve(1);
+  CHECK(fv.size() == 0);
+  CHECK(fv.capacity() == 1);
 
-SECTION("initialize() 3", "")
-{
-  int data[] = { 1, 2, 3, 4 };
-  default_fv.initialize(data, data + 4);
-  CHECK(default_fv.size() == 4);
-  CHECK(default_fv[0] == 1);
-  CHECK(default_fv[1] == 2);
-  CHECK(default_fv[2] == 3);
-  CHECK(default_fv[3] == 4);
-}
+  fv.emplace_back(27);
+  CHECK(fv.front().x == 27);
 
-SECTION("fixed_vector<NonCopyable>", "")
-{
-  apf::fixed_vector<NonCopyable> fv(1000);
-
-  //std::vector<NonCopyable> v(1000);  // this wouldn't work!
-
-  apf::fixed_vector<NonCopyable> fv2();
+  CHECK_THROWS_AS(fv.emplace_back(23), std::logic_error);
 }
 
 } // TEST_CASE fixed_vector
@@ -165,22 +221,41 @@ SECTION("fixed_vector<NonCopyable>", "")
 TEST_CASE("fixed_list", "Test fixed_list")
 {
 
-SECTION("first constructor", "")
+SECTION("default constructor", "")
+{
+  apf::fixed_list<int> fl;
+  CHECK(fl.size() == 0);
+}
+
+SECTION("constructor from size", "")
 {
   apf::fixed_list<int> fl(3);
   CHECK(fl.size() == 3);
   CHECK(fl.front() == 0);
 }
 
-SECTION("second constructor", "")
+SECTION("constructor from size and initializer", "")
 {
-  apf::fixed_list<int> fl(std::make_pair(3ul, 99));
+  apf::fixed_list<int> fl(3, 42);
   CHECK(fl.size() == 3);
-  CHECK(fl.front() == 99);
-  CHECK(fl.back() == 99);
+  CHECK(fl.front() == 42);
 }
 
-SECTION("third constructor and more", "")
+SECTION("constructor from size and several initializers", "")
+{
+  apf::fixed_list<mystruct> fl(3, 42, 25);
+  CHECK(fl.size() == 3);
+  CHECK(fl.front().second == 25);
+}
+
+SECTION("constructor from initializer list", "")
+{
+  apf::fixed_list<int> fl{3, 42};
+  CHECK(fl.size() == 2);
+  CHECK(fl.front() == 3);
+}
+
+SECTION("constructor from sequence and more", "")
 {
   int data[] = { 1, 2, 3, 4 };
   apf::fixed_list<int> fl(data, data+4);
@@ -242,11 +317,12 @@ SECTION("empty()", "not really useful ...")
   CHECK(fl.empty());
 }
 
-SECTION("fixed_list<NonCopyable>", "")
+SECTION("fixed_list<NonCopyableButMovable>", "")
 {
-  apf::fixed_list<NonCopyable> fl(1000);
-
-  //std::list<NonCopyable> v(1000);  // this wouldn't work!
+  apf::fixed_list<NonCopyableButMovable> fl(1000);
+  CHECK(fl.back().x == 666);
+  apf::fixed_list<NonCopyableButMovable> fl2(1000, 42);
+  CHECK(fl2.back().x == 42);
 }
 
 } // TEST_CASE fixed_list
@@ -260,8 +336,8 @@ SECTION("default constructor", "... and initialize()")
 {
   fm matrix;
   CHECK(matrix.empty());
-  CHECK(matrix.channels.begin() == matrix.channels.end());
-  CHECK(matrix.slices.begin() == matrix.slices.end());
+  CHECK(matrix.channels.begin() == matrix.channels.end());  // not allowed!
+  CHECK(matrix.slices.begin() == matrix.slices.end());  // not allowed!
 
   matrix.initialize(2, 3);
   CHECK_FALSE(matrix.empty());

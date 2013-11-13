@@ -97,7 +97,7 @@ int mimoprocessor_file_io(Processor& processor
   StopWatch watch("processing");
 
   size_t actual_frames = 0;
-  while ((actual_frames = in.readf(m_in.begin(), blocksize)) != 0)
+  while ((actual_frames = in.readf(m_in.data(), blocksize)) != 0)
   {
     m_in_transpose.set_channels(m_in.slices);
 
@@ -107,7 +107,7 @@ int mimoprocessor_file_io(Processor& processor
 
     m_out.set_channels(m_out_transpose.slices);
 
-    out.writef(m_out.begin(), actual_frames);
+    out.writef(m_out.data(), actual_frames);
   }
 
   //out.writeSync();  // write cache buffers to disk

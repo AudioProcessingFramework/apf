@@ -262,10 +262,7 @@ TEST_CASE("iterators/circular_iterator/3"
     , "Test if it also works with a bidirectional iterator")
 {
 
-  std::list<int> l;
-  l.push_back(0);
-  l.push_back(1);
-  l.push_back(2);
+  std::list<int> l = {0, 1, 2};
   apf::circular_iterator<std::list<int>::iterator> it(l.begin(), l.end());
 
   CHECK(*it == 0);

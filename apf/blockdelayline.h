@@ -183,7 +183,7 @@ template<typename T>
 typename BlockDelayLine<T>::pointer
 BlockDelayLine<T>::get_write_pointer() const
 {
-  return _block_circulator.base().base();
+  return &*_block_circulator.base().base();
 }
 
 /** Get the read circulator.

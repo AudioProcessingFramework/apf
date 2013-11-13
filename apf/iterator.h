@@ -75,7 +75,7 @@ template<typename T> bool no_nullptr(T&) { return true; }
 #define APF_ITERATOR_CONSTRUCTORS(iterator_name, base_iterator_type, base_member) \
   /** Constructor from base iterator. @param base_iterator base iterator **/ \
   explicit iterator_name(base_iterator_type base_iterator) \
-    : base_member(base_iterator) { assert(apf::no_nullptr(base_member)); } \
+    : base_member(base_iterator) {} \
   /** Default constructor. @note This constructor creates a singular iterator. Another iterator_name can be assigned to it, but nothing else works. **/ \
   iterator_name() : base_member() {}
 
@@ -133,7 +133,6 @@ template<typename T> bool no_nullptr(T&) { return true; }
 #define APF_ITERATOR_INPUT_EQUAL(base_member) \
   /** Straightforward equality operator. **/ \
   bool operator==(const self& rhs) const { \
-    assert(apf::no_nullptr(base_member) && apf::no_nullptr(rhs.base_member)); \
     return ((base_member) == (rhs.base_member)); }
 
 /// Straightforward preincrement operator.
@@ -245,7 +244,8 @@ template<typename T> bool no_nullptr(T&) { return true; }
 /// @ingroup apf_iterator_macros
 #define APF_ITERATOR_RANDOMACCESS_ADDITION_ASSIGNMENT(base_member) \
   /** Straightforward addition/assignment operator. **/ \
-  self& operator+=(difference_type n) { assert(apf::no_nullptr(base_member)); \
+  self& operator+=(difference_type n) { \
+    assert(!n || apf::no_nullptr(base_member)); \
     (base_member) += n; return *this; }
 
 /// Straightforward difference operator.
@@ -367,9 +367,14 @@ class has_begin_and_end
     reference operator[](size_type n) const { return _begin[n]; }
 
   protected:
-    iterator _begin;  ///< can be assigned to in derived class
-    iterator _end;    ///< can be assigned to in derived class
+    iterator _begin, _end;
 };
+
+template<typename I, typename... Args>
+has_begin_and_end<I> make_begin_and_end(I first, Args&&... args)
+{
+  return {first, std::forward<Args>(args)...};
+}
 
 /// Helper class for apf::cast_proxy and apf::transform_proxy.
 /// @see iterator_proxy_const
@@ -761,7 +766,8 @@ class circular_iterator
     self&
     operator+=(difference_type n)
     {
-      assert(no_nullptr(_begin) && no_nullptr(_end) && no_nullptr(_current));
+      assert(!n
+          || (no_nullptr(_begin) && no_nullptr(_end) && no_nullptr(_current)));
       difference_type length = _end     - _begin;
       difference_type index  = _current - _begin;
       index += n;
@@ -1064,9 +1070,7 @@ class stride_iterator
         )
       : _iter(base_iterator)
       , _step(step)
-    {
-      assert(no_nullptr(_iter));
-    }
+    {}
 
     /// Create a stride iterator from another stride iterator.
     /// @param base_iterator the base (stride) iterator
@@ -1074,9 +1078,7 @@ class stride_iterator
     stride_iterator(stride_iterator<I> base_iterator, difference_type step)
       : _iter(base_iterator.base())
       , _step(base_iterator.step_size() * step)
-    {
-      assert(no_nullptr(_iter));
-    }
+    {}
 
     /// Default constructor.
     /// @note This constructor creates a singular iterator. Another
@@ -1089,9 +1091,7 @@ class stride_iterator
     bool
     operator==(const self& rhs) const
     {
-      assert(no_nullptr(_iter) && no_nullptr(rhs._iter));
-      assert(_step == rhs._step);
-      return (_iter == rhs._iter);
+      return _iter == rhs._iter && _step == rhs._step;
     }
 
     self&
@@ -1120,7 +1120,7 @@ class stride_iterator
     self&
     operator+=(difference_type n)
     {
-      assert(no_nullptr(_iter));
+      assert(!n || no_nullptr(_iter));
       std::advance(_iter, n * _step);
       return *this;
     }

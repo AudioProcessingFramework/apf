@@ -32,19 +32,24 @@
 namespace apf
 {
 
-/// Classes derived from this class cannot be copied.
-/// Private copy constructor and copy assignment ensure that.
+/// Classes derived from this class cannot be copied (but still moved).
 class NonCopyable
 {
   protected:
-     NonCopyable() {} ///< Protected default constructor
-    ~NonCopyable() {} ///< Protected non-virtual destructor
+     NonCopyable() = default;  ///< Protected default constructor
+    ~NonCopyable() = default;  ///< Protected non-virtual destructor
 
-  private:
+  public:
     /// @name Deactivated copy ctor and assignment operator
     //@{
-    NonCopyable(const NonCopyable&);
-    NonCopyable& operator=(const NonCopyable&);
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
+    //@}
+
+    /// @name Default move ctor and move assignment operator
+    //@{
+    NonCopyable(NonCopyable&&) = default;
+    NonCopyable& operator=(NonCopyable&&) = default;
     //@}
 };
 

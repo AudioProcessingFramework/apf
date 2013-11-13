@@ -27,6 +27,7 @@
 
 #include <algorithm>  // for std::transform()
 #include <functional> // for std::multiplies(), std::bind()
+#include <vector>
 
 #include "apf/mimoprocessor.h"
 #include "apf/combine_channels.h"  // for CombineChannels
@@ -43,12 +44,11 @@ class SimpleProcessor : public apf::MimoProcessor<SimpleProcessor
 {
   public:
     class Input : public MimoProcessorBase::Input
-                , public apf::has_begin_and_end<
-                                 apf::fixed_vector<sample_type>::const_iterator>
+             , public apf::has_begin_and_end<MimoProcessorBase::Input::iterator>
     {
       private:
-        typedef apf::has_begin_and_end<apf::fixed_vector<sample_type>
-          ::const_iterator> _begin_end_base;
+        typedef apf::has_begin_and_end<MimoProcessorBase::Input::iterator>
+          _begin_end_base;
 
       public:
         typedef _begin_end_base::iterator iterator;
@@ -73,7 +73,7 @@ class SimpleProcessor : public apf::MimoProcessor<SimpleProcessor
         }
 
       private:
-        apf::fixed_vector<sample_type> _buffer;
+        std::vector<sample_type> _buffer;
     };
 
     class Output;

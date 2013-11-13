@@ -27,7 +27,6 @@
 #ifndef APF_CONVOLVER_H
 #define APF_CONVOLVER_H
 
-#include <utility>  // for std::pair
 #include <algorithm>  // for std::transform()
 #include <cassert>
 
@@ -63,12 +62,15 @@ static size_t min_partitions(size_t block_size, size_t filter_size)
 }
 
 /// Two blocks of time-domain or FFT (half-complex) data.
-struct fft_node : fixed_vector<float, fftw_allocator<float> >
+struct fft_node : fixed_vector<float, fftw_allocator<float>>
 {
   explicit fft_node(size_t n)
     : fixed_vector<float, fftw_allocator<float> >(n)
     , zero(true)
   {}
+
+  fft_node(const fft_node&) = delete;
+  fft_node(fft_node&&) = default;
 
   fft_node& operator=(const fft_node& rhs)
   {
@@ -99,15 +101,7 @@ struct Filter : fixed_vector<fft_node>
 {
   /// Constructor; create empty filter.
   Filter(size_t block_size_, size_t partitions_)
-    : fixed_vector<fft_node>(std::make_pair(partitions_, block_size_ * 2))
-  {
-    assert(this->partitions() > 0);
-  }
-
-  /// Constructor from std::pair, forwarded to fixed_vector constructor.
-  template<typename Size, typename Initializer>
-  Filter(const std::pair<Size, Initializer>& arg)
-    : fixed_vector<fft_node>(arg)
+    : fixed_vector<fft_node>(partitions_, block_size_ * 2)
   {
     assert(this->partitions() > 0);
   }
@@ -227,7 +221,7 @@ TransformBase::prepare_partition(In first, In last, fft_node& partition) const
   {
     std::copy(first, first + chunk, partition.begin());
     std::fill(partition.begin() + chunk, partition.end(), 0.0f); // zero padding
-    _fft(partition.begin());
+    _fft(partition.data());
     partition.zero = false;
   }
   return first + chunk;
@@ -278,15 +272,15 @@ struct Transform : TransformBase
   {
     // Temporary memory area for FFTW planning routines
     fft_node planning_space(this->partition_size());
-    _fft_plan = _create_plan(planning_space.begin());
+    _fft_plan = _create_plan(planning_space.data());
   }
 };
 
 template<typename In>
 Filter::Filter(size_t block_size_, In first, In last, size_t partitions_)
-  : fixed_vector<fft_node>(std::make_pair(partitions_ ? partitions_
-        : min_partitions(block_size_, std::distance(first, last))
-        , block_size_ * 2))
+  : fixed_vector<fft_node>(partitions_ ? partitions_
+      : min_partitions(block_size_, std::distance(first, last))
+      , block_size_ * 2)
 {
   assert(this->partitions() > 0);
 
@@ -303,17 +297,17 @@ struct Input : TransformBase
   Input(size_t block_size_, size_t partitions_)
     : TransformBase(block_size_)
     // One additional list element for preparing the upcoming partition:
-    , spectra(std::make_pair(partitions_+1, this->partition_size()))
+    , spectra(partitions_ + 1, this->partition_size())
   {
     assert(partitions_ > 0);
 
-    _fft_plan = _create_plan(spectra.front().begin());
+    _fft_plan = _create_plan(spectra.front().data());
   }
 
   template<typename In>
   void add_block(In first);
 
-  size_t partitions() const { return spectra.size()-1; }
+  size_t partitions() const { return spectra.size() - 1; }
 
   /// Spectra of the partitions (double-blocks) of the input signal to be
   /// convolved. The first element is the most recent signal chunk.
@@ -373,7 +367,7 @@ Input::add_block(In first)
   }
   else
   {
-    _fft(current.begin());
+    _fft(current.data());
   }
 }
 
@@ -387,10 +381,10 @@ class OutputBase
     size_t partitions() const { return _filter_ptrs.size(); }
 
   protected:
-    OutputBase(const Input& input);
-    ~OutputBase() { fftw<float>::destroy_plan(_ifft_plan); }
+    explicit OutputBase(const Input& input);
 
-    const fft_node _empty_partition;
+    // This is non-const to allow automatic move-constructor:
+    fft_node _empty_partition;
 
     typedef fixed_vector<const fft_node*> filter_ptrs_t;
     filter_ptrs_t _filter_ptrs;
@@ -411,7 +405,7 @@ class OutputBase
     const size_t _partition_size;
 
     fft_node _output_buffer;
-    fftw<float>::plan _ifft_plan;
+    fftw<float>::scoped_plan _ifft_plan;
 };
 
 OutputBase::OutputBase(const Input& input)
@@ -421,9 +415,9 @@ OutputBase::OutputBase(const Input& input)
   , _input(input)
   , _partition_size(input.partition_size())
   , _output_buffer(_partition_size)
-  , _ifft_plan(fftw<float>::plan_r2r_1d(int(_partition_size)
-      , _output_buffer.begin()
-      , _output_buffer.begin(), FFTW_HC2R, FFTW_PATIENT))
+  , _ifft_plan(fftw<float>::plan_r2r_1d, int(_partition_size)
+      , _output_buffer.data()
+      , _output_buffer.data(), FFTW_HC2R, FFTW_PATIENT)
 {
   assert(_filter_ptrs.size() > 0);
 }
@@ -441,7 +435,12 @@ OutputBase::convolve(float weight)
   _multiply_spectra();
 
   // The first half will be discarded
-  float* second_half = _output_buffer.begin() + _input.block_size();
+  auto second_half = make_begin_and_end(
+      _output_buffer.begin() + _input.block_size(), _output_buffer.end());
+
+  assert(static_cast<size_t>(
+        std::distance(second_half.begin(), second_half.end()))
+      == _input.block_size());
 
   if (_output_buffer.zero)
   {
@@ -454,10 +453,12 @@ OutputBase::convolve(float weight)
 
     // normalize buffer (fftw3 does not do this)
     const float norm = weight / float(_partition_size);
-    std::transform(second_half, _output_buffer.end(), second_half
-        , std::bind(std::multiplies<float>(), norm, std::placeholders::_1));
+    for (auto& x: second_half)
+    {
+      x *= norm;
+    }
   }
-  return second_half;
+  return &second_half[0];
 }
 
 void
@@ -546,7 +547,7 @@ OutputBase::_multiply_spectra()
   std::fill(_output_buffer.begin(), _output_buffer.end(), 0.0f);
   _output_buffer.zero = true;
 
-  fixed_list<fft_node>::const_iterator input = _input.spectra.begin();
+  auto input = _input.spectra.begin();
 
   for (filter_ptrs_t::const_iterator ptr = _filter_ptrs.begin()
       ; ptr != _filter_ptrs.end()
@@ -559,9 +560,9 @@ OutputBase::_multiply_spectra()
     if (input->zero || filter->zero) continue;
 
 #ifdef __SSE__
-    _multiply_partition_simd(input->begin(), filter->begin());
+    _multiply_partition_simd(input->data(), filter->data());
 #else
-    _multiply_partition_cpp(input->begin(), filter->begin());
+    _multiply_partition_cpp(input->data(), filter->data());
 #endif
 
     _output_buffer.zero = false;
@@ -739,7 +740,7 @@ class StaticOutput : public OutputBase
     }
 
     // This is only used for the first constructor!
-    std::auto_ptr<Filter> _filter;
+    std::unique_ptr<Filter> _filter;
 };
 
 /// Combination of Input and Output
