@@ -179,15 +179,16 @@ class BiQuad : public SosCoefficients<T> , private DenormalPrevention<T>
 
 /// %Cascade of filter sections.
 /// @tparam S section type, e.g. BiQuad
-template<typename S>
+template<typename S, typename Container = std::vector<S>>
 class Cascade
 {
   public:
     typedef typename S::argument_type argument_type;
     typedef typename S::result_type result_type;
+    typedef typename Container::size_type size_type;
 
     /// Constructor.
-    explicit Cascade(int n) : _sections(n) {}
+    explicit Cascade(size_type n) : _sections(n) {}
 
     /// Overwrite sections with new content.
     /// @tparam I Iterator type for arguments
@@ -196,7 +197,7 @@ class Cascade
     template<typename I>
     void set(I first, I last)
     {
-      assert(_sections.size() == size_t(std::distance(first, last)));
+      assert(_sections.size() == size_type(std::distance(first, last)));
 
       std::copy(first, last, _sections.begin());
     }
@@ -234,10 +235,10 @@ class Cascade
       }
     }
 
-    size_t number_of_sections() const { return _sections.size(); }
+    size_type number_of_sections() const { return _sections.size(); }
 
   private:
-    std::vector<S> _sections;
+    Container _sections;
 };
 
 namespace internal
