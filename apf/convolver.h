@@ -132,18 +132,21 @@ class TransformBase
   protected:
     explicit TransformBase(size_t block_size_);
 
-    ~TransformBase() { fftw<float>::destroy_plan(_fft_plan); }
+    ~TransformBase() = default;  ///< Protected destructor
 
-    fftw<float>::plan _create_plan(float* array) const;
+    using scoped_plan = fftw<float>::scoped_plan;
+    using plan_ptr = std::unique_ptr<scoped_plan>;
+
+    plan_ptr _create_plan(float* array) const;
 
     /// In-place FFT
     void _fft(float* first) const
     {
-      fftw<float>::execute_r2r(_fft_plan, first, first);
+      fftw<float>::execute_r2r(*_fft_plan, first, first);
       _sort_coefficients(first);
     }
 
-    fftw<float>::plan _fft_plan;
+    plan_ptr _fft_plan;
 
   private:
     void _sort_coefficients(float* first) const;
@@ -153,8 +156,7 @@ class TransformBase
 };
 
 TransformBase::TransformBase(size_t block_size_)
-  : _fft_plan(nullptr)
-  , _block_size(block_size_)
+  : _block_size(block_size_)
   , _partition_size(2 * _block_size)
 {
   if (_block_size % 8 != 0)
@@ -170,11 +172,11 @@ TransformBase::TransformBase(size_t block_size_)
  * plans is not thread-safe).
  * It is not necessary to re-use plans in other convolver instances.
   **/
-fftw<float>::plan
+TransformBase::plan_ptr
 TransformBase::_create_plan(float* array) const
 {
-  return fftw<float>::plan_r2r_1d(int(_partition_size)
-      , array, array, FFTW_R2HC, FFTW_PATIENT);
+  return plan_ptr(new scoped_plan(fftw<float>::plan_r2r_1d, int(_partition_size)
+      , array, array, FFTW_R2HC, FFTW_PATIENT));
 }
 
 /** %Transform time-domain samples.
