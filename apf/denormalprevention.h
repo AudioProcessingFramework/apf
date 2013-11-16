@@ -33,6 +33,9 @@
 #ifdef __SSE__
 #include <xmmintrin.h>  // for SSE intrinsics
 #endif
+#ifdef __SSE3__
+#include <pmmintrin.h>  // for SSE3 intrinsics
+#endif
 
 namespace apf
 {
@@ -190,16 +193,14 @@ struct NoisePrevention<float>
 /// @note requires SSE support
 inline void ftz_on()
 {
-  _mm_setcsr(_mm_getcsr() | 0x8000);
-  // This should also work on Intel Macs!
-  // TODO: is this GCC-specific?
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
 }
 
 /// Unset Flush-To-Zero (FTZ).
 /// @note requires SSE support
 inline void ftz_off()
 {
-  _mm_setcsr(_mm_getcsr() & ~0x8000);
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
 }
 
 #ifdef __SSE3__
@@ -216,14 +217,14 @@ inline void ftz_off()
 /// value. If bit 6 is set, DAZ is supported, otherwise, it isn't.
 void daz_on()
 {
-  _mm_setcsr(_mm_getcsr() | 0x0040);
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 }
 
 /// Unset Denormals-Are-Zero (DAZ).
 /// @note requires SSE3 support
 void daz_off()
 {
-  _mm_setcsr(_mm_getcsr() & ~0x0040);
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
 }
 #endif
 #endif

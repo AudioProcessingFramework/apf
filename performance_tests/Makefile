@@ -1,7 +1,15 @@
 EXECUTABLES += crossfade
 EXECUTABLES += interpolation
+EXECUTABLES += biquad_denormals
+EXECUTABLES += biquad_count_denormals
 
 OPT ?= -O3
+
+# TODO: automatic tests of different combinations for biquad_denormals:
+OPT += -march=native
+#OPT += -mfpmath=sse
+#OPT += -msse
+#OPT += -msse3
 
 CXXFLAGS += $(OPT)
 CXXFLAGS += -g
