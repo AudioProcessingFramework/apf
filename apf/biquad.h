@@ -28,7 +28,7 @@
 #define APF_BIQUAD_H
 
 #include <iosfwd>  // for std::ostream
-#include <cmath>  // for pow(), tan(), sqrt(), ...
+#include <cmath>  // for std::pow(), std::tan(), std::sqrt(), ...
 #include <complex>
 #include <vector>
 #include <cassert>  // for assert()
@@ -105,9 +105,8 @@ struct SosCoefficients
   friend SosCoefficients
   operator-(const SosCoefficients& lhs, const SosCoefficients& rhs)
   {
-    return SosCoefficients(lhs.b0 - rhs.b0
-        , lhs.b1 - rhs.b1, lhs.b2 - rhs.b2
-        , lhs.a1 - rhs.a1, lhs.a2 - rhs.a2);
+    return {lhs.b0 - rhs.b0, lhs.b1 - rhs.b1, lhs.b2 - rhs.b2
+                           , lhs.a1 - rhs.a1, lhs.a2 - rhs.a2};
   }
 
   friend std::ostream&
@@ -143,8 +142,8 @@ template<typename T, template<typename> class DenormalPrevention = apf::dp::ac>
 class BiQuad : public SosCoefficients<T> , private DenormalPrevention<T>
 {
   public:
-    typedef T argument_type;
-    typedef T result_type;
+    using argument_type = T;
+    using result_type = T;
 
     BiQuad() : w0(), w1(), w2() {}
 
@@ -183,9 +182,9 @@ template<typename S, typename Container = std::vector<S>>
 class Cascade
 {
   public:
-    typedef typename S::argument_type argument_type;
-    typedef typename S::result_type result_type;
-    typedef typename Container::size_type size_type;
+    using argument_type = typename S::argument_type;
+    using result_type = typename S::result_type;
+    using size_type = typename Container::size_type;
 
     /// Constructor.
     explicit Cascade(size_type n) : _sections(n) {}
@@ -226,7 +225,7 @@ class Cascade
     template<typename In, typename Out>
     void execute(In first, In last, Out result)
     {
-      typedef typename std::iterator_traits<Out>::value_type out_t;
+      using out_t = typename std::iterator_traits<Out>::value_type;
 
       while (first != last)
       {

@@ -27,7 +27,6 @@
 #ifndef APF_MATH_H
 #define APF_MATH_H
 
-#include <limits> // for numeric_limits<>
 #include <cmath>  // for std::pow(), ...
 #include <iterator> // for std::iterator_traits
 #include <numeric>  // for std::accumulate
@@ -263,8 +262,8 @@ template<typename T>
 class raised_cosine
 {
   public:
-    typedef T argument_type;
-    typedef T result_type;
+    using argument_type = T;
+    using result_type = T;
 
     /// Constructor. @param period of a full cosine oscillation
     explicit raised_cosine(T period = 0) : _period(period) {}
@@ -292,8 +291,8 @@ template<typename T, typename U = T>
 class linear_interpolator
 {
   public:
-    typedef U argument_type;
-    typedef T result_type;
+    using argument_type = U;
+    using result_type = T;
 
     /// Default constructor
     linear_interpolator() : _first(), _increment() {}
