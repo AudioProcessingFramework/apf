@@ -28,10 +28,9 @@
 #define APF_BLOCKDELAYLINE_H
 
 #include <algorithm>  // for std::max()
+#include <vector>  // default container
 
 #include "apf/iterator.h"  // for circular_iterator, stride_iterator
-#include "apf/container.h"  // for fixed_vector
-#include "apf/misc.h"  // for NonCopyable
 
 namespace apf
 {
@@ -41,16 +40,13 @@ namespace apf
  * The write operation is simple and fast.
  * The desired delay is specified at the more flexible read operation.
  **/
-template<typename T>
-class BlockDelayLine : apf::NonCopyable
+template<typename T, typename Container = std::vector<T>>
+class BlockDelayLine
 {
-  private:
-    typedef fixed_vector<T> data_t;
-
   public:
-    typedef typename data_t::size_type size_type;
-    typedef typename data_t::pointer pointer;
-    typedef apf::circular_iterator<typename data_t::iterator> circulator;
+    typedef typename Container::size_type size_type;
+    typedef typename Container::pointer pointer;
+    typedef apf::circular_iterator<typename Container::iterator> circulator;
 
     BlockDelayLine(size_type block_size, size_type max_delay);
 
@@ -91,7 +87,7 @@ class BlockDelayLine : apf::NonCopyable
 
     const size_type _number_of_blocks; ///< No\. of blocks needed for storage
 
-    data_t _data; ///< Internal storage for sample data
+    Container _data;  ///< Internal storage for sample data
 
     /// Circular iterator which iterates over each sample
     circulator _data_circulator;
@@ -104,8 +100,9 @@ class BlockDelayLine : apf::NonCopyable
  * @param block_size Block size
  * @param max_delay Maximum delay in samples
  **/
-template<typename T>
-BlockDelayLine<T>::BlockDelayLine(size_type block_size, size_type max_delay)
+template<typename T, typename Container>
+BlockDelayLine<T, Container>::BlockDelayLine(size_type block_size
+    , size_type max_delay)
   : _block_size(block_size)
   , _max_delay(max_delay)
   // Minimum number of blocks is 2, even if _max_delay is 0.
@@ -131,10 +128,10 @@ BlockDelayLine<T>::BlockDelayLine(size_type block_size, size_type max_delay)
  * @note @p source must be a random access iterator. If you want to use another
  * iterator, you'll have to do it on your own (as written above).
  **/
-template<typename T>
+template<typename T, typename Container>
 template<typename Iterator>
 void
-BlockDelayLine<T>::write_block(Iterator source)
+BlockDelayLine<T, Container>::write_block(Iterator source)
 {
   this->advance();
   // Ignore return value, next time get_write_pointer() has to be used again!
@@ -146,10 +143,11 @@ BlockDelayLine<T>::write_block(Iterator source)
  * @param delay Delay in samples
  * @return @b true on success
  **/
-template<typename T>
+template<typename T, typename Container>
 template<typename Iterator>
 bool
-BlockDelayLine<T>::read_block(Iterator destination, size_type delay) const
+BlockDelayLine<T, Container>::read_block(Iterator destination, size_type delay)
+  const
 {
   // TODO: try to get a more meaningful error message if source is not a random
   // access iterator (e.g. when using a std::list)
@@ -160,11 +158,11 @@ BlockDelayLine<T>::read_block(Iterator destination, size_type delay) const
 }
 
 /// Read from the delay line and multiply each element by a given factor.
-template<typename T>
+template<typename T, typename Container>
 template<typename Iterator>
 bool
-BlockDelayLine<T>::read_block(Iterator destination, size_type delay, T weight)
-  const
+BlockDelayLine<T, Container>::read_block(Iterator destination
+    , size_type delay, T weight) const
 {
   if (!this->delay_is_valid(delay)) return false;
   circulator source = this->get_read_circulator(delay);
@@ -179,9 +177,9 @@ BlockDelayLine<T>::read_block(Iterator destination, size_type delay, T weight)
  * @attention You must not write more than one block with this pointer! For
  * the next block, you have to get a new pointer.
  **/
-template<typename T>
-typename BlockDelayLine<T>::pointer
-BlockDelayLine<T>::get_write_pointer() const
+template<typename T, typename Container>
+typename BlockDelayLine<T, Container>::pointer
+BlockDelayLine<T, Container>::get_write_pointer() const
 {
   return &*_block_circulator.base().base();
 }
@@ -191,9 +189,9 @@ BlockDelayLine<T>::get_write_pointer() const
  * @attention There is no check if the delay is in the valid range between
  * 0 and @c max_delay. You are responsible for checking that!
  **/
-template<typename T>
-typename BlockDelayLine<T>::circulator
-BlockDelayLine<T>::get_read_circulator(size_type delay) const
+template<typename T, typename Container>
+typename BlockDelayLine<T, Container>::circulator
+BlockDelayLine<T, Container>::get_read_circulator(size_type delay) const
 {
   return _get_data_circulator() - delay;
 }
@@ -203,11 +201,11 @@ BlockDelayLine<T>::get_read_circulator(size_type delay) const
  * value of the) negative delay can be at most as large as the initial delay.
  * @see BlockDelayLine
  **/
-template<typename T>
-class NonCausalBlockDelayLine : private BlockDelayLine<T>
+template<typename T, typename Container = std::vector<T>>
+class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
 {
   private:
-    typedef BlockDelayLine<T> _base;
+    typedef BlockDelayLine<T, Container> _base;
 
   public:
     typedef typename _base::size_type size_type;
