@@ -25,8 +25,6 @@
 // The used policies can be specified with the preprocessor macros
 // APF_MIMOPROCESSOR_*_POLICY.
 
-#include <algorithm>  // for std::transform()
-#include <functional> // for std::multiplies(), std::bind()
 #include <vector>
 
 #include "apf/mimoprocessor.h"
