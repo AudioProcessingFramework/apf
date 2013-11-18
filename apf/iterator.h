@@ -333,7 +333,7 @@ class has_begin_and_end
   public:
     typedef I iterator;
     typedef typename std::iterator_traits<I>::reference reference;
-    typedef size_t size_type;
+    typedef typename std::iterator_traits<I>::difference_type difference_type;
 
     /// Default constructor. Singular iterators are created.
     has_begin_and_end() : _begin(), _end() {}
@@ -364,7 +364,7 @@ class has_begin_and_end
 
     /// Subscript operator.
     /// @note This only works if @p I is a random access iterator!
-    reference operator[](size_type n) const { return _begin[n]; }
+    reference operator[](difference_type n) const { return _begin[n]; }
 
   protected:
     iterator _begin, _end;

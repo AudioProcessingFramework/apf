@@ -46,6 +46,7 @@ SECTION("copy ctor, assignment", "X b(a); b=a;")
   di iter1(x, y);
   di iter2(iter1);
   di iter3 = iter1;
+  (void)iter2;
   (void)iter3;
   di iter4;
   iter4 = iter1;

@@ -83,14 +83,14 @@ struct thread_traits
 class enable_queries
 {
   protected:
-    enable_queries(int fifo_size) : _query_fifo(fifo_size) {}
+    enable_queries(size_t fifo_size) : _query_fifo(fifo_size) {}
     CommandQueue _query_fifo;
 };
 
 class disable_queries
 {
   protected:
-    disable_queries(int) {}
+    disable_queries(size_t) {}
     struct { void process_commands() {} } _query_fifo;
 };
 
@@ -293,7 +293,6 @@ class MimoProcessor : public interface_policy
   protected:
     typedef APF_MIMOPROCESSOR_BASE MimoProcessorBase;
 
-    typedef typename rtlist_t::size_type      size_type;
     typedef typename rtlist_t::iterator       rtlist_iterator;
     typedef typename rtlist_t::const_iterator rtlist_const_iterator;
 

@@ -244,6 +244,7 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T>
     bool delay_is_valid(difference_type delay) const
     {
       if (delay < -_initial_delay) return false;
+      if (delay < 0) return true;
       return _base::delay_is_valid(delay + _initial_delay);
     }
 

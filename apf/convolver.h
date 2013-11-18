@@ -237,7 +237,7 @@ TransformBase::_sort_coefficients(float* data) const
 {
   fixed_vector<float> buffer(_partition_size);
 
-  int base = 8;
+  size_t base = 8;
 
   buffer[0] = data[0];
   buffer[1] = data[1];
@@ -250,12 +250,12 @@ TransformBase::_sort_coefficients(float* data) const
 
   for (size_t i = 0; i < (_partition_size / 8-1); i++)
   {
-    for (int ii = 0; ii < 4; ii++)
+    for (size_t ii = 0; ii < 4; ii++)
     {
       buffer[base+ii] = data[base/2+ii];
     }
 
-    for (int ii = 0; ii < 4; ii++)
+    for (size_t ii = 0; ii < 4; ii++)
     {
       buffer[base+4+ii] = data[_partition_size-base/2-ii];
     }
@@ -576,7 +576,7 @@ OutputBase::_unsort_coefficients()
 {
   fixed_vector<float> buffer(_partition_size);
 
-  int base = 8;
+  size_t base = 8;
 
   buffer[0]                 = _output_buffer[0];
   buffer[1]                 = _output_buffer[1];
@@ -589,12 +589,12 @@ OutputBase::_unsort_coefficients()
 
   for (size_t i=0; i < (_partition_size / 8-1); i++)
   {
-    for (int ii = 0; ii < 4; ii++)
+    for (size_t ii = 0; ii < 4; ii++)
     {
       buffer[base/2+ii] = _output_buffer[base+ii];
     }
 
-    for (int ii = 0; ii < 4; ii++)
+    for (size_t ii = 0; ii < 4; ii++)
     {
       buffer[_partition_size-base/2-ii] = _output_buffer[base+4+ii];
     }

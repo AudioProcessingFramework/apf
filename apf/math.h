@@ -47,7 +47,7 @@ template<>
 inline float pi<float>()
 {
   // 9 digits are needed for float, 17 digits for double, 21 for long double
-  // But this may be different on other hardware platforms ...?
+  // TODO: But this may be different on other hardware platforms ...?
   return 3.1415926535897932384626433832795f;
 }
 
