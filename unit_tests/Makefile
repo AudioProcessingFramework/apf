@@ -48,6 +48,8 @@ CXXFLAGS += -Wold-style-cast
 CXXFLAGS += -Wlong-long
 CXXFLAGS += -Winline
 
+#CXXFLAGS += -Wno-sign-conversion
+
 CPPFLAGS += -I..
 
 # this adds (very slow) runtime checks for many STL functions:

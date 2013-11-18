@@ -28,9 +28,29 @@
 #define APF_MISC_H
 
 #include <utility>  // for std::forward
+#include <type_traits>  // for std::is_base_of
 
 namespace apf
 {
+
+/// Curiously Recurring Template Pattern (CRTP) base class.
+/// The idea for derived() is stolen from the Eigen library.
+template<typename Derived>
+class CRTP
+{
+  public:
+    Derived& derived()
+    {
+      static_assert(std::is_base_of<CRTP, Derived>::value
+          , "Derived must be derived from CRTP (as the name suggests)!");
+
+      return *static_cast<Derived*>(this);
+    }
+
+  protected:
+     CRTP() = default;
+    ~CRTP() = default;  ///< Protected destructor to avoid base class pointers
+};
 
 /// Classes derived from this class cannot be copied (but still moved).
 class NonCopyable

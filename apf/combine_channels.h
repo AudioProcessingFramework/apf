@@ -36,6 +36,7 @@
 #include <type_traits>  // for std::remove_reference
 
 #include "apf/iterator.h" // for *_iterator, make_*_iterator(), cast_proxy_const
+#include "apf/misc.h"  // for CRTP
 
 namespace apf
 {
@@ -65,7 +66,7 @@ namespace CombineChannelsResult
  *   CombineChannelsCrossfadeCopy, CombineChannelsInterpolation
  **/
 template<typename Derived, typename ListProxy, typename Out>
-class CombineChannelsBase
+class CombineChannelsBase : public CRTP<Derived>
 {
   protected:
     typedef typename std::iterator_traits<typename std::remove_reference<
@@ -94,7 +95,7 @@ class CombineChannelsBase
 
       _accumulate = false;
 
-      static_cast<Derived*>(this)->before_the_loop();
+      this->derived().before_the_loop();
 
       for (typename std::remove_reference<ListProxy>::type::iterator item
           = _in.begin()
@@ -109,13 +110,13 @@ class CombineChannelsBase
             continue;  // jump to next list item
 
           case constant:
-            static_cast<Derived*>(this)->case_one(*item, f);
+            this->derived().case_one(*item, f);
             break;
 
           case change:
           case fade_in:
           case fade_out:
-            static_cast<Derived*>(this)->case_two(*item, f);
+            this->derived().case_two(*item, f);
             break;
 
           default:
@@ -123,7 +124,7 @@ class CombineChannelsBase
         }
       }
 
-      static_cast<Derived*>(this)->after_the_loop();
+      this->derived().after_the_loop();
 
       if (!_accumulate)
       {

@@ -113,6 +113,7 @@ template<typename Derived
 class MimoProcessor : public interface_policy
                     , public thread_policy
                     , public query_policy
+                    , public CRTP<Derived>
                     , NonCopyable
 {
   public:
@@ -149,14 +150,13 @@ class MimoProcessor : public interface_policy
      * be instantiated with the most derived class!
      **/
     template<typename X>
-    struct ProcessItem : Item
+    struct ProcessItem : Item, public CRTP<X>
     {
-      struct Process { explicit Process(Item&) {} };
+      struct Process { explicit Process(ProcessItem&) {} };
 
       virtual void process()
       {
-        assert(dynamic_cast<X*>(this));
-        typename X::Process(*static_cast<X*>(this));
+        typename X::Process(this->derived());
       }
     };
 
@@ -225,8 +225,7 @@ class MimoProcessor : public interface_policy
     template<typename F>
     void new_query(F& query_function)
     {
-      _query_fifo.push(new QueryCommand<F>(query_function
-            , *static_cast<Derived*>(this)));
+      _query_fifo.push(new QueryCommand<F>(query_function, this->derived()));
     }
 
     bool activate()
@@ -270,8 +269,7 @@ class MimoProcessor : public interface_policy
     {
       typedef typename P::outer X;
       P temp = p;
-      assert(dynamic_cast<Derived*>(this));
-      temp.parent = static_cast<Derived*>(this);
+      temp.parent = &this->derived();
       return static_cast<X*>(_add_helper(new X(temp)));
     }
 
@@ -296,7 +294,7 @@ class MimoProcessor : public interface_policy
     typedef typename rtlist_t::iterator       rtlist_iterator;
     typedef typename rtlist_t::const_iterator rtlist_const_iterator;
 
-    struct Process { Process(MimoProcessorBase&) {} };
+    struct Process { Process(Derived&) {} };
 
     explicit MimoProcessor(const parameter_map& params = parameter_map());
 
@@ -375,8 +373,7 @@ class MimoProcessor : public interface_policy
     {
       _fifo.process_commands();
       _process_list(_input_list);
-      assert(dynamic_cast<Derived*>(this));
-      typename Derived::Process(*static_cast<Derived*>(this));
+      typename Derived::Process(this->derived());
       _process_list(_output_list);
       _query_fifo.process_commands();
     }
@@ -528,6 +525,7 @@ class APF_MIMOPROCESSOR_BASE::Xput : public Item
 APF_MIMOPROCESSOR_TEMPLATES
 class APF_MIMOPROCESSOR_BASE::Input : public Xput
                                     , public interface_policy::Input
+                                    , public CRTP<typename Derived::Input>
 {
   public:
     struct Params : Xput::Params
@@ -547,9 +545,7 @@ class APF_MIMOPROCESSOR_BASE::Input : public Xput
     virtual void process()
     {
       this->fetch_buffer();
-      assert(dynamic_cast<typename Derived::Input*>(this));
-      typename Derived::Input::Process(
-          *static_cast<typename Derived::Input*>(this));
+      typename Derived::Input::Process(this->derived());
     }
 };
 
@@ -571,6 +567,7 @@ class APF_MIMOPROCESSOR_BASE::DefaultInput : public Input
 APF_MIMOPROCESSOR_TEMPLATES
 class APF_MIMOPROCESSOR_BASE::Output : public Xput
                                      , public interface_policy::Output
+                                     , public CRTP<typename Derived::Output>
 {
   public:
     struct Params : Xput::Params
@@ -590,9 +587,7 @@ class APF_MIMOPROCESSOR_BASE::Output : public Xput
     virtual void process()
     {
       this->fetch_buffer();
-      assert(dynamic_cast<typename Derived::Output*>(this));
-      typename Derived::Output::Process(
-          *static_cast<typename Derived::Output*>(this));
+      typename Derived::Output::Process(this->derived());
     }
 };
 
