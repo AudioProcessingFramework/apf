@@ -196,25 +196,6 @@ inline T next_power_of_2(T number)
   return power_of_2;
 }
 
-namespace internal
-{
-
-/** Helper functor for max_amplitude().
- * @param current maximum until now
- * @param next number
- * @return @p current, if current > abs(@p next), else abs(@p next)
- **/
-template<typename T>
-struct max_abs
-{
-  T operator()(T current, T next)
-  {
-    return std::max(current, std::abs(next));
-  }
-};
-
-}  // namespace internal
-
 /** Return the absolute maximum of a series of numbers.
  * @param begin beginning of range
  * @param end         end of range
@@ -225,7 +206,8 @@ inline typename std::iterator_traits<I>::value_type
 max_amplitude(I begin, I end)
 {
   typedef typename std::iterator_traits<I>::value_type T;
-  return std::accumulate(begin, end, T(), internal::max_abs<T>());
+  return std::accumulate(begin, end, T()
+      , [] (T current, T next) { return std::max(current, std::abs(next)); });
 }
 
 /** Root Mean Square (RMS) value of a series of numbers.
