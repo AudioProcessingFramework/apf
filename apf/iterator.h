@@ -1185,7 +1185,7 @@ class stride_iterator
 
   private:
     I _iter; ///< Base iterator
-    // this could be const, except then the iterator wouldn't be copyable:
+    // This has to be non-const to allow automatic assignment operator:
     difference_type _step; ///< Iterator increment
 };
 
