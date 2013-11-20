@@ -132,7 +132,8 @@ class TransformBase
   protected:
     explicit TransformBase(size_t block_size_);
 
-    ~TransformBase() = default;  ///< Protected destructor
+    TransformBase(TransformBase&&) = default;
+    ~TransformBase() = default;
 
     using scoped_plan = fftw<float>::scoped_plan;
     using plan_ptr = std::unique_ptr<scoped_plan>;
