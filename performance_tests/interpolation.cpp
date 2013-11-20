@@ -37,7 +37,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
                     , apf::posix_thread_policy>
 {
   public:
-    typedef DefaultInput Input;
+    using Input = DefaultInput;
     class Output;
     class CombineFunction;
 

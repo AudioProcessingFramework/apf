@@ -46,7 +46,7 @@ namespace apf
 class dummy_thread_policy
 {
   public:
-    typedef int useconds_type;
+    using useconds_type = int;
 
     class Thread;
     template<typename F> struct ScopedThread;
@@ -55,14 +55,14 @@ class dummy_thread_policy
     class Semaphore;
 
   protected:
-     dummy_thread_policy() {}  ///< Protected ctor.
-    ~dummy_thread_policy() {}  ///< Protected dtor.
+     dummy_thread_policy() = default;  ///< Protected ctor.
+    ~dummy_thread_policy() = default;  ///< Protected dtor.
 };
 
 class dummy_thread_policy::Thread
 {
   public:
-    typedef int native_handle_type;
+    using native_handle_type = int;
 
     void create(void* (*f)(void*), void* data)
     {
@@ -123,7 +123,7 @@ class dummy_thread_policy::Lock
 class dummy_thread_policy::Semaphore
 {
   public:
-    typedef unsigned int value_type;
+    using value_type = unsigned int;
 
     explicit Semaphore(value_type = 0)
     {

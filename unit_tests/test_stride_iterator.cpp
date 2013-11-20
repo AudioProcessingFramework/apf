@@ -29,7 +29,7 @@
 
 #include "catch/catch.hpp"
 
-typedef apf::stride_iterator<int*> si;
+using si = apf::stride_iterator<int*>;
 
 TEST_CASE("iterators/stride_iterator", "Test all functions of stride_iterator")
 {
@@ -53,7 +53,7 @@ SECTION("stride", "Test if stride works.")
 {
   int array[9];
 
-  si iter(array, 2);
+  auto iter = si(array, 2);
 
   CHECK(iter.base() == &array[0]);
   CHECK(iter.step_size() == 2);
@@ -87,10 +87,10 @@ SECTION("special constructor"
 {
   int array[9];
 
-  si iter1(array, 2);
+  auto iter1 = si(array, 2);
   CHECK(iter1.step_size() == 2);
 
-  si iter2(iter1, 3);
+  auto iter2 = si(iter1, 3);
   CHECK(iter2.step_size() == 6);
 
   ++iter2;

@@ -47,7 +47,7 @@ namespace apf
 class portaudio_policy
 {
   public:
-    typedef float sample_type;
+    using sample_type = float;
     class Input;
     class Output;
 
@@ -62,7 +62,7 @@ class portaudio_policy
 
     static std::string device_info()
     {
-      PaError err = Pa_Initialize();
+      auto err = Pa_Initialize();
       if (err != paNoError) throw portaudio_error(err);
 
       std::string result;
@@ -80,8 +80,8 @@ class portaudio_policy
       // 32bit float, non-interleaved
       unsigned long sample_format = 0x00000001 | 0x80000000;
 
-      PaStreamParameters inputParameters;
-      PaStreamParameters outputParameters;
+      auto inputParameters = PaStreamParameters();
+      auto outputParameters = PaStreamParameters();
 
       inputParameters.channelCount = _next_input_id;
       inputParameters.device = _device_id;
@@ -97,7 +97,7 @@ class portaudio_policy
       outputParameters.suggestedLatency
         = 0; //Pa_GetDeviceInfo(_device_id)->defaultLowOutputLatency ;
 
-      PaError err = Pa_OpenStream(&_stream, &inputParameters, &outputParameters
+      auto err = Pa_OpenStream(&_stream, &inputParameters, &outputParameters
           , _sample_rate, _block_size, 0, _pa_callback, this);
 
       if (err != paNoError) throw portaudio_error(err);
@@ -109,7 +109,7 @@ class portaudio_policy
 
     bool deactivate()
     {
-      PaError err = Pa_StopStream(_stream);
+      auto err = Pa_StopStream(_stream);
       if (err != paNoError) throw portaudio_error(err);
       return true;
     }
@@ -133,7 +133,7 @@ class portaudio_policy
       , _next_input_id(0)
       , _next_output_id(0)
     {
-      PaError err = Pa_Initialize();
+      auto err = Pa_Initialize();
       if (err != paNoError) throw portaudio_error(err);
     }
 
@@ -194,7 +194,7 @@ class portaudio_policy
 class portaudio_policy::Input
 {
   public:
-    typedef sample_type const* iterator;
+    using iterator = sample_type const*;
 
     struct buffer_type : has_begin_and_end<iterator> { friend class Input; };
 
@@ -212,7 +212,7 @@ class portaudio_policy::Input
       , _id(_parent.get_next_input_id())
     {}
 
-    ~Input() {}
+    ~Input() = default;
 
   private:
     portaudio_policy& _parent;
@@ -222,7 +222,7 @@ class portaudio_policy::Input
 class portaudio_policy::Output
 {
   public:
-    typedef sample_type* iterator;
+    using iterator = sample_type*;
 
     struct buffer_type : has_begin_and_end<iterator> { friend class Output; };
 
@@ -240,7 +240,7 @@ class portaudio_policy::Output
       , _id(_parent.get_next_output_id())
     {}
 
-    ~Output() {}
+    ~Output() = default;
 
   private:
     portaudio_policy& _parent;

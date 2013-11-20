@@ -31,7 +31,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
                     , apf::pointer_policy<float*>, apf::dummy_thread_policy>
 {
   public:
-    typedef MimoProcessorBase::DefaultInput Input;
+    using Input = MimoProcessorBase::DefaultInput;
 
     class MyIntermediateThing : public ProcessItem<MyIntermediateThing>
     {

@@ -191,9 +191,9 @@ template<typename In>
 void
 TransformBase::prepare_filter(In first, In last, Filter& filter) const
 {
-  for (Filter::iterator it = filter.begin(); it != filter.end(); ++it)
+  for (auto& partition: filter)
   {
-    first = this->prepare_partition(first, last, *it);
+    first = this->prepare_partition(first, last, partition);
   }
 }
 
@@ -213,7 +213,7 @@ TransformBase::prepare_partition(In first, In last, fft_node& partition) const
   assert(size_t(std::distance(partition.begin(), partition.end()))
       == _partition_size);
 
-  size_t chunk = std::min(_block_size, size_t(std::distance(first, last)));
+  auto chunk = std::min(_block_size, size_t(std::distance(first, last)));
 
   if (chunk == 0)
   {
@@ -236,7 +236,7 @@ TransformBase::prepare_partition(In first, In last, fft_node& partition) const
 void
 TransformBase::_sort_coefficients(float* data) const
 {
-  fixed_vector<float> buffer(_partition_size);
+  auto buffer = fixed_vector<float>(_partition_size);
 
   size_t base = 8;
 
@@ -331,8 +331,8 @@ Input::add_block(In first)
   // rotate buffers (this->spectra.size() is always at least 2)
   this->spectra.move(--this->spectra.end(), this->spectra.begin());
 
-  fft_node& current = this->spectra.front();
-  fft_node& next = this->spectra.back();
+  auto& current = this->spectra.front();
+  auto& next = this->spectra.back();
 
   if (math::has_only_zeros(first, last))
   {
@@ -389,7 +389,7 @@ class OutputBase
     // This is non-const to allow automatic move-constructor:
     fft_node _empty_partition;
 
-    typedef fixed_vector<const fft_node*> filter_ptrs_t;
+    using filter_ptrs_t = fixed_vector<const fft_node*>;
     filter_ptrs_t _filter_ptrs;
 
   private:
@@ -455,7 +455,7 @@ OutputBase::convolve(float weight)
     _ifft();
 
     // normalize buffer (fftw3 does not do this)
-    const float norm = weight / float(_partition_size);
+    const auto norm = weight / float(_partition_size);
     for (auto& x: second_half)
     {
       x *= norm;
@@ -469,8 +469,8 @@ OutputBase::_multiply_partition_cpp(const float* signal, const float* filter)
 {
   // see http://www.ludd.luth.se/~torger/brutefir.html#bruteconv_4
 
-  float d1s = _output_buffer[0] + signal[0] * filter[0];
-  float d2s = _output_buffer[4] + signal[4] * filter[4];
+  auto d1s = _output_buffer[0] + signal[0] * filter[0];
+  auto d2s = _output_buffer[4] + signal[4] * filter[4];
 
   for (size_t nn = 0; nn < _partition_size; nn += 8)
   {
@@ -507,8 +507,8 @@ OutputBase::_multiply_partition_simd(const float* signal, const float* filter)
   // 16 byte alignment is needed for _mm_load_ps()!
   // This should be the case anyway because fftwf_malloc() is used.
 
-  float dc = _output_buffer[0] + signal[0] * filter[0];
-  float ny = _output_buffer[4] + signal[4] * filter[4];
+  auto dc = _output_buffer[0] + signal[0] * filter[0];
+  auto ny = _output_buffer[4] + signal[4] * filter[4];
 
   for(size_t i = 0; i < _partition_size; i += 8)
   {
@@ -550,14 +550,12 @@ OutputBase::_multiply_spectra()
   std::fill(_output_buffer.begin(), _output_buffer.end(), 0.0f);
   _output_buffer.zero = true;
 
+  assert(_filter_ptrs.size() == _input.partitions());
+
   auto input = _input.spectra.begin();
 
-  for (filter_ptrs_t::const_iterator ptr = _filter_ptrs.begin()
-      ; ptr != _filter_ptrs.end()
-      ; ++ptr, ++input)
+  for (const auto filter: _filter_ptrs)
   {
-    const fft_node* filter = *ptr;
-
     assert(filter != nullptr);
 
     if (input->zero || filter->zero) continue;
@@ -569,6 +567,7 @@ OutputBase::_multiply_spectra()
 #endif
 
     _output_buffer.zero = false;
+    ++input;
   }
 }
 
@@ -643,7 +642,7 @@ class Output : public OutputBase
 void
 Output::set_filter(const Filter& filter)
 {
-  Filter::const_iterator partition = filter.begin();
+  auto partition = filter.begin();
 
   // First partition has no queue and is updated immediately
   if (partition != filter.end())
@@ -672,8 +671,8 @@ Output::queues_empty() const
   // It may not be obvious, but that's what the following code does:
   // If some non-null pointer is found in the last queue, return false
 
-  filter_ptrs_t::const_iterator first = _queues.rbegin()->begin();
-  filter_ptrs_t::const_iterator last  = _queues.rbegin()->end();
+  auto first = _queues.rbegin()->begin();
+  auto last  = _queues.rbegin()->end();
   return std::find_if(first, last, math::identity<const fft_node*>()) == last;
 }
 
@@ -684,19 +683,18 @@ Output::queues_empty() const
 void
 Output::rotate_queues()
 {
-  filter_ptrs_t::iterator target = _filter_ptrs.begin();
+  auto target = _filter_ptrs.begin();
   // Skip first element, it doesn't have a queue
   ++target;
 
-  for (fixed_vector<filter_ptrs_t>::iterator it = _queues.begin()
-      ; it != _queues.end()
-      ; ++it, ++target)
+  for (auto& queue: _queues)
   {
     // If first element is valid, use it
-    if (it->front()) *target = it->front();
+    if (queue.front()) *target = queue.front();
 
-    std::copy(it->begin() + 1, it->end(), it->begin());
-    *it->rbegin() = nullptr;
+    std::copy(queue.begin() + 1, queue.end(), queue.begin());
+    *queue.rbegin() = nullptr;
+    ++target;
   }
 }
 
@@ -730,14 +728,12 @@ class StaticOutput : public OutputBase
   private:
     void _set_filter(const Filter& filter)
     {
-      Filter::const_iterator from = filter.begin();
+      auto from = filter.begin();
 
-      for (filter_ptrs_t::iterator to = _filter_ptrs.begin()
-          ; to != _filter_ptrs.end()
-          ; ++to)
+      for (auto& to: _filter_ptrs)
       {
         // If less partitions are given, the rest is set to zero
-        *to = (from == filter.end()) ? &_empty_partition : &*from++;
+        to = (from == filter.end()) ? &_empty_partition : &*from++;
       }
       // If further partitions are available, they are ignored
     }
@@ -778,42 +774,41 @@ template<typename BinaryFunction>
 void transform_nested(const Filter& in1, const Filter& in2, Filter& out
     , BinaryFunction f)
 {
-  Filter::const_iterator it1 = in1.begin();
-  Filter::const_iterator it2 = in2.begin();
+  auto it1 = in1.begin();
+  auto it2 = in2.begin();
 
-  for (Filter::iterator it3 = out.begin()
-      ; it3 != out.end()
-      ; ++it3)
+  for (auto& result: out)
   {
     if (it1 == in1.end() || it1->zero)
     {
       if (it2 == in2.end() || it2->zero)
       {
-        it3->zero = true;
+        result.zero = true;
       }
       else
       {
-        assert(it2->size() == it3->size());
-        std::transform(it2->begin(), it2->end(), it3->begin()
+        assert(it2->size() == result.size());
+        std::transform(it2->begin(), it2->end(), result.begin()
             , std::bind(f, 0, std::placeholders::_1));
-        it3->zero = false;
+        result.zero = false;
       }
     }
     else
     {
       if (it2 == in2.end() || it2->zero)
       {
-        assert(it1->size() == it3->size());
-        std::transform(it1->begin(), it1->end(), it3->begin()
+        assert(it1->size() == result.size());
+        std::transform(it1->begin(), it1->end(), result.begin()
             , std::bind(f, std::placeholders::_1, 0));
-        it3->zero = false;
+        result.zero = false;
       }
       else
       {
         assert(it1->size() == it2->size());
-        assert(it1->size() == it3->size());
-        std::transform(it1->begin(), it1->end(), it2->begin(), it3->begin(), f);
-        it3->zero = false;
+        assert(it1->size() == result.size());
+        std::transform(it1->begin(), it1->end(), it2->begin(), result.begin()
+            , f);
+        result.zero = false;
       }
     }
     if (it1 != in1.end()) ++it1;

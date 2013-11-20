@@ -66,7 +66,7 @@ struct SosCoefficients
 
   SosCoefficients operator+(const SosCoefficients& rhs) const
   {
-    SosCoefficients tmp(*this);
+    auto tmp = SosCoefficients(*this);
     return tmp += rhs;
   }
 
@@ -79,7 +79,7 @@ struct SosCoefficients
 
   SosCoefficients operator*(T rhs) const
   {
-    SosCoefficients tmp(*this);
+    auto tmp = SosCoefficients(*this);
     return tmp *= rhs;
   }
 
@@ -92,13 +92,13 @@ struct SosCoefficients
 
   SosCoefficients operator/(T rhs) const
   {
-    SosCoefficients tmp(*this);
+    auto tmp = SosCoefficients(*this);
     return tmp /= rhs;
   }
 
   friend SosCoefficients operator*(T lhs, const SosCoefficients& rhs)
   {
-    SosCoefficients temp(rhs);
+    auto temp = SosCoefficients(rhs);
     return temp *= lhs;
   }
 
@@ -206,13 +206,10 @@ class Cascade
     /// @return Output sample
     result_type operator()(argument_type in)
     {
-      for (typename std::vector<S>::iterator it = _sections.begin()
-          ; it != _sections.end()
-          ; ++it)
+      for (auto& section: _sections)
       {
-        in = it->operator()(in);
+        in = section(in);
       }
-
       return in;
     }
 

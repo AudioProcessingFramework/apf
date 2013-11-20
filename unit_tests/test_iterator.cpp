@@ -41,7 +41,7 @@ SECTION("default constructor", "")
 
 SECTION("constructor with begin and end", "... and assignment op")
 {
-  apf::has_begin_and_end<int*> range(a, a+3);
+  auto range = apf::has_begin_and_end<int*>(a, a+3);
   CHECK(range.begin() == a);
   CHECK(range.end() == a + 3);
   apf::has_begin_and_end<int*> range2;
@@ -52,17 +52,17 @@ SECTION("constructor with begin and end", "... and assignment op")
 
 SECTION("constructor with begin and length", "... and copy ctor")
 {
-  apf::has_begin_and_end<int*> range(a, 3);
+  auto range = apf::has_begin_and_end<int*>(a, 3);
   CHECK(range.begin() == a);
   CHECK(range.end() == a + 3);
-  apf::has_begin_and_end<int*> range2(range);
+  auto range2 = apf::has_begin_and_end<int*>(range);
   CHECK(range2.begin() == a);
   CHECK(range2.end() == a + 3);
 }
 
 SECTION("subscript operator", "")
 {
-  apf::has_begin_and_end<int*> range(a, 3);
+  auto range = apf::has_begin_and_end<int*>(a, 3);
   CHECK(range[1] == 2);
   range[1] = 42;
   CHECK(range[1] == 42);
@@ -71,7 +71,7 @@ SECTION("subscript operator", "")
 SECTION("const subscript operator", "")
 {
   const int* b = a;
-  apf::has_begin_and_end<const int*> range(b, 3);
+  auto range = apf::has_begin_and_end<const int*>(b, 3);
   CHECK(range[1] == 2);
   //range[1] = 42;  // doesn't work (as expected)
 }
@@ -90,7 +90,8 @@ l.push_back(3);
 
 SECTION("bidirectional iterator", "")
 {
-  apf::has_begin_and_end<std::list<int>::iterator> range(l.begin(), l.end());
+  auto range
+    = apf::has_begin_and_end<std::list<int>::iterator>(l.begin(), l.end());
   CHECK(range.begin() == l.begin());
   CHECK(range.end() == l.end());
   CHECK(*range.begin() == 1);

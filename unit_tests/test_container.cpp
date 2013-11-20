@@ -327,7 +327,7 @@ SECTION("fixed_list<NonCopyableButMovable>", "")
 
 } // TEST_CASE fixed_list
 
-typedef apf::fixed_matrix<int> fm;
+using fm = apf::fixed_matrix<int>;
 
 TEST_CASE("fixed_matrix", "Test fixed_matrix")
 {

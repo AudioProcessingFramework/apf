@@ -44,7 +44,7 @@ int mimoprocessor_file_io(Processor& processor
 {
   std::cout << "Opening file \"" << infilename << "\" ..." << std::endl;
 
-  SndfileHandle in(infilename, SFM_READ);
+  auto in = SndfileHandle(infilename, SFM_READ);
 
   if (int err = in.error())
   {
@@ -64,7 +64,7 @@ int mimoprocessor_file_io(Processor& processor
     return 666;
   }
 
-  SndfileHandle out(outfilename, SFM_WRITE
+  auto out = SndfileHandle(outfilename, SFM_WRITE
       , in.format(), processor.out_channels(), in.samplerate());
 
   if (int err = out.error())
@@ -73,7 +73,7 @@ int mimoprocessor_file_io(Processor& processor
     return err;
   }
 
-  SF_FORMAT_INFO format_info;
+  auto format_info = SF_FORMAT_INFO();
   format_info.format = in.format();
   in.command(SFC_GET_FORMAT_INFO, &format_info, sizeof(format_info));
 

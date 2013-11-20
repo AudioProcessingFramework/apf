@@ -36,7 +36,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
                     , apf::dummy_thread_policy>
 {
   public:
-    typedef MimoProcessorBase::DefaultInput Input;
+    using Input = MimoProcessorBase::DefaultInput;
 
     class Output : public MimoProcessorBase::DefaultOutput
     {

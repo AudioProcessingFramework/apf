@@ -32,14 +32,14 @@ TEST_CASE("BlockParameter", "")
 
 SECTION("default ctor", "")
 {
-  apf::BlockParameter<int> bp;
+  auto bp = apf::BlockParameter<int>();
   CHECK(0 == bp.get());
   CHECK(0 == bp.get_old());
 }
 
 SECTION("int", "")
 {
-  apf::BlockParameter<int> bp(111);
+  auto bp = apf::BlockParameter<int>(111);
   CHECK(111 == bp.get());
   CHECK(111 == bp.get_old());
   CHECK_FALSE(bp.changed());
@@ -55,7 +55,7 @@ SECTION("int", "")
 
 SECTION("conversion operator", "")
 {
-  apf::BlockParameter<int> bp(42);
+  auto bp = apf::BlockParameter<int>(42);
   int i = 0;
   CHECK(0 == i);
   i = bp;
@@ -65,7 +65,7 @@ SECTION("conversion operator", "")
 
 SECTION("conversion operator from const object", "")
 {
-  const apf::BlockParameter<int> bp(42);
+  const auto bp = apf::BlockParameter<int>(42);
   int i = 0;
   CHECK(0 == i);
   i = bp;
@@ -77,6 +77,7 @@ struct NonCopyable
 {
   NonCopyable(int) {};  // hypothetical constructor
   NonCopyable(const NonCopyable&) = delete;
+  NonCopyable(NonCopyable&&) = default;
   NonCopyable& operator=(NonCopyable&& other) = default;
 };
 
@@ -84,7 +85,7 @@ SECTION("non-copyable T", "")
 {
   // These are just compile-time checks:
 
-  apf::BlockParameter<NonCopyable> bp{42};
+  auto bp = apf::BlockParameter<NonCopyable>{42};
   bp = NonCopyable(43);
 };
 
@@ -107,7 +108,7 @@ struct CountCtors
 
 SECTION("check if move ctor and move assignment is used", "")
 {
-  apf::BlockParameter<CountCtors> bp{CountCtors()};
+  auto bp = apf::BlockParameter<CountCtors>{CountCtors()};
   CHECK(bp.get().copy_constructor == 1);
   CHECK(bp.get_old().move_constructor == 1);
 

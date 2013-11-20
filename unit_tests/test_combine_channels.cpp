@@ -29,9 +29,9 @@
 
 #include <vector>
 
-typedef std::vector<int> Item;
+using Item = std::vector<int>;
 
-typedef std::vector<Item> L;
+using L = std::vector<Item>;
 
 struct SelectChange
 {
@@ -46,7 +46,7 @@ struct SelectChange
 class Crossfade
 {
   public:
-    typedef std::vector<int> vi;
+    using vi = std::vector<int>;
 
     Crossfade(size_t block_size)
       : _size(block_size)

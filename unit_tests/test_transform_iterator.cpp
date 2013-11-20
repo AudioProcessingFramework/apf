@@ -36,7 +36,7 @@ struct three_halves
   float operator()(int in) { return static_cast<float>(in) * 1.5f; }
 };
 
-typedef apf::transform_iterator<int*, three_halves> fii;
+using fii = apf::transform_iterator<int*, three_halves>;
 
 TEST_CASE("iterators/transform_iterator"
     , "Test all functions of transform_iterator")
@@ -55,7 +55,7 @@ int array[] = { 1, 2, 3 };
 
 SECTION("dereference", "*a; *a++; a[]")
 {
-  fii iter(array);
+  auto iter = fii(array);
 
   CHECK(*iter == 1.5f);
   CHECK(iter.base() == &array[0]);
@@ -176,7 +176,7 @@ SECTION("lambda functions", "")
 TEST_CASE("transform_proxy", "Test transform_proxy")
 {
 
-typedef std::vector<int> vi;
+using vi = std::vector<int>;
 vi input;
 input.push_back(1);
 input.push_back(2);
@@ -184,7 +184,7 @@ input.push_back(3);
 
 SECTION("test transform_proxy", "")
 {
-  apf::transform_proxy<three_halves, vi> p(input);
+  auto p = apf::transform_proxy<three_halves, vi>(input);
 
   CHECK(p.size() == 3);
   CHECK((*p.begin()) == 1.5);
@@ -193,7 +193,7 @@ SECTION("test transform_proxy", "")
 
 SECTION("test tranform_proxy_const", "")
 {
-  apf::transform_proxy_const<three_halves, vi> p(input);
+  auto p = apf::transform_proxy_const<three_halves, vi>(input);
 
   CHECK(p.size() == 3);
   CHECK((*p.begin()) == 1.5);

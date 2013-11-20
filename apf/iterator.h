@@ -331,9 +331,9 @@ template<typename I>
 class has_begin_and_end
 {
   public:
-    typedef I iterator;
-    typedef typename std::iterator_traits<I>::reference reference;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
+    using iterator = I;
+    using reference = typename std::iterator_traits<I>::reference;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
 
     /// Default constructor. Singular iterators are created.
     has_begin_and_end() : _begin(), _end() {}
@@ -382,10 +382,10 @@ template<typename I, typename Container>
 class iterator_proxy
 {
   public:
-    typedef I iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef typename Container::size_type size_type;
-    typedef typename std::iterator_traits<I>::value_type value_type;
+    using iterator = I;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using size_type = typename Container::size_type;
+    using value_type = typename std::iterator_traits<I>::value_type;
 
     // implicit conversion is desired, therefore no "explicit" keyword
     iterator_proxy(Container& l) : _l(l) {}
@@ -408,10 +408,10 @@ template<typename I, typename Container>
 class iterator_proxy_const
 {
   public:
-    typedef I iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef typename Container::size_type size_type;
-    typedef typename std::iterator_traits<I>::value_type value_type;
+    using iterator = I;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using size_type = typename Container::size_type;
+    using value_type = typename std::iterator_traits<I>::value_type;
 
     // implicit conversion is desired, therefore no "explicit" keyword
     iterator_proxy_const(const Container& l) : _l(l) {}
@@ -442,14 +442,14 @@ template<typename I>
 class accumulating_iterator
 {
   private:
-    typedef accumulating_iterator self;
+    using self = accumulating_iterator;
 
   public:
-    typedef std::output_iterator_tag iterator_category;
-    typedef void                     value_type;
-    typedef void                     difference_type;
-    typedef void                     pointer;
-    typedef void                     reference;
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_type = void;
+    using pointer = void;
+    using reference = void;
 
     APF_ITERATOR_CONSTRUCTORS(accumulating_iterator, I, _base_iterator)
 
@@ -520,15 +520,15 @@ template<typename T, typename I>
 class cast_iterator
 {
   private:
-    typedef cast_iterator self;
+    using self = cast_iterator;
 
   public:
-    typedef T value_type;
-    typedef T* pointer;
-    typedef T& reference;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
-    typedef typename std::iterator_traits<I>::iterator_category
-                                                              iterator_category;
+    using value_type = T;
+    using pointer = T*;
+    using reference = T&;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
+    using iterator_category
+      = typename std::iterator_traits<I>::iterator_category;
 
     APF_ITERATOR_CONSTRUCTORS(cast_iterator, I, _base_iterator)
 
@@ -614,7 +614,7 @@ template<typename T, typename Container>
 struct cast_proxy : iterator_proxy<
                       cast_iterator<T, typename Container::iterator>, Container>
 {
-  typedef T value_type;
+  using value_type = T;
 
   cast_proxy(Container& l)
     : iterator_proxy<cast_iterator<
@@ -639,7 +639,7 @@ template<typename T, typename Container>
 struct cast_proxy_const : iterator_proxy_const<
           cast_iterator<const T, typename Container::const_iterator>, Container>
 {
-  typedef T value_type;
+  using value_type = T;
 
   cast_proxy_const(const Container& l)
     : iterator_proxy_const<cast_iterator<
@@ -668,17 +668,17 @@ template<typename I>
 class circular_iterator
 {
   private:
-    typedef circular_iterator self;
+    using self = circular_iterator;
 
   public:
     /// @name Type Definitions from the Underlying Iterator
     //@{
-    typedef typename std::iterator_traits<I>::iterator_category
-                                                              iterator_category;
-    typedef typename std::iterator_traits<I>::value_type      value_type;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
-    typedef typename std::iterator_traits<I>::pointer         pointer;
-    typedef typename std::iterator_traits<I>::reference       reference;
+    using iterator_category
+      = typename std::iterator_traits<I>::iterator_category;
+    using value_type = typename std::iterator_traits<I>::value_type;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
+    using pointer = typename std::iterator_traits<I>::pointer;
+    using reference = typename std::iterator_traits<I>::reference;
     //@}
 
     /// @name Constructors
@@ -873,18 +873,18 @@ template<typename I, typename F>
 class transform_iterator
 {
   private:
-    typedef transform_iterator self;
+    using self = transform_iterator;
     // NOTE: value_type& works for by-value, by-reference and by-const-reference
-    typedef F _signature(typename std::iterator_traits<I>::value_type&);
+    using _signature = F(typename std::iterator_traits<I>::value_type&);
 
   public:
-    typedef typename std::iterator_traits<I>::iterator_category
-                                                              iterator_category;
+    using iterator_category
+      = typename std::iterator_traits<I>::iterator_category;
     /// Can be a reference, but doesn't necessarily have to
-    typedef typename std::result_of<_signature>::type reference;
-    typedef typename std::remove_reference<reference>::type value_type;
-    typedef value_type* pointer;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
+    using reference = typename std::result_of<_signature>::type;
+    using value_type = typename std::remove_reference<reference>::type;
+    using pointer = value_type*;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
 
     /// Constructor.
     explicit transform_iterator(I base_iterator = I(), F f = F())
@@ -982,14 +982,14 @@ template<typename T>
 class index_iterator
 {
   private:
-    typedef index_iterator self;
+    using self = index_iterator;
 
   public:
-    typedef std::random_access_iterator_tag iterator_category;
-    typedef T value_type;
-    typedef T reference;
-    typedef T difference_type;
-    typedef void pointer;
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = T;
+    using reference = T;
+    using difference_type = T;
+    using pointer = void;
 
     /// Constructor. @param start Starting index
     explicit index_iterator(T start = T())
@@ -1047,17 +1047,17 @@ template<class I>
 class stride_iterator
 {
   private:
-    typedef stride_iterator self;
+    using self = stride_iterator;
 
   public:
     /// @name Type Definitions from the Underlying Iterator
     //@{
-    typedef typename std::iterator_traits<I>::iterator_category
-                                                              iterator_category;
-    typedef typename std::iterator_traits<I>::value_type      value_type;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
-    typedef typename std::iterator_traits<I>::reference       reference;
-    typedef typename std::iterator_traits<I>::pointer         pointer;
+    using iterator_category
+      = typename std::iterator_traits<I>::iterator_category;
+    using value_type = typename std::iterator_traits<I>::value_type;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
+    using reference = typename std::iterator_traits<I>::reference;
+    using pointer = typename std::iterator_traits<I>::pointer;
     //@}
 
     /// This is the normal constructor.
@@ -1206,24 +1206,23 @@ template<typename I1, typename I2 = I1>
 class dual_iterator
 {
   private:
-    typedef dual_iterator self;
+    using self = dual_iterator;
 
   public:
     // TODO: what if I1 or I2 are only input or output iterators?
     // TODO: some witty metaprogram to find the greatest common denominator?
-    typedef std::forward_iterator_tag iterator_category;
+    using iterator_category = std::forward_iterator_tag;
 
-    typedef std::pair<typename std::iterator_traits<I1>::value_type
-                    , typename std::iterator_traits<I2>::value_type> value_type;
+    using value_type = std::pair<typename std::iterator_traits<I1>::value_type
+                               , typename std::iterator_traits<I2>::value_type>;
 
     class output_proxy;  // For implementation see below
-    typedef output_proxy reference;
+    using reference = output_proxy;
 
-    typedef std::ptrdiff_t difference_type;
-    typedef void pointer;
+    using difference_type = std::ptrdiff_t;
+    using pointer = void;
 
-    /// Default constructor
-    dual_iterator() {}
+    dual_iterator() = default;
 
     /// Constructor from two iterators
     dual_iterator(I1 i1, I2 i2) : _i1(i1), _i2(i2) {}
@@ -1274,7 +1273,7 @@ class dual_iterator<I1, I2>::output_proxy
     template<typename T1, typename T2>
     operator std::pair<T1, T2>()
     {
-      return std::pair<T1, T2>(*_i1, *_i2);
+      return {*_i1, *_i2};
     }
 
     /// Special assignment operator for std::pair
@@ -1348,13 +1347,13 @@ make_dual_iterator(I1 i1, I2 i2)
 class discard_iterator
 {
   private:
-    typedef discard_iterator self;
+    using self = discard_iterator;
 
   public:
-    typedef std::output_iterator_tag iterator_category;
-    typedef void                     value_type;
-    typedef void                     difference_type;
-    typedef void                     pointer;
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_type = void;
+    using pointer = void;
 
     /// Helper class for discard_iterator
     struct output_proxy
@@ -1368,7 +1367,7 @@ class discard_iterator
       output_proxy& operator+=(const T&) { return *this; }
     };
 
-    typedef output_proxy reference;
+    using reference = output_proxy;
 
     /// Dereference operator.
     /// @return a temporary object of type output_proxy

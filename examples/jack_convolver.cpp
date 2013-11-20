@@ -37,7 +37,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
                     , apf::posix_thread_policy>
 {
   public:
-    typedef MimoProcessorBase::DefaultInput Input;
+    using Input = MimoProcessorBase::DefaultInput;
 
     template<typename In>
     MyProcessor(In first, In last);

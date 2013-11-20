@@ -186,7 +186,7 @@ int main()
   MyProcessor processor;
 
   std::string input;
-  float volume = 1.0f;
+  auto volume = 1.0f;
 
   for (;;)
   {

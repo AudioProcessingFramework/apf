@@ -69,8 +69,7 @@ struct parameter_map
   const std::string& operator[](const std::string& k) const
     throw (std::range_error)
   {
-    std::map<std::string, std::string>::const_iterator it;
-    it = _map.find(k);
+    auto it = _map.find(k);
     if (it == _map.end())
     {
       throw std::range_error("Parameter \"" + k + "\" does not exist in map!");

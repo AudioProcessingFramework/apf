@@ -65,7 +65,7 @@ std::string A2S(const T& input)
 template<typename out_T>
 inline bool convert(std::istream& input, out_T& output)
 {
-  out_T result = out_T();
+  auto result = out_T();
   input >> result >> std::ws;
   if (!input.fail() && input.eof())
   {
@@ -159,11 +159,10 @@ bool S2A(const in_T<char_T, traits, Allocator>& input, out_T& output)
  * @see S2A()
  **/
 template<typename out_T, typename in_T>
-out_T S2RV(const in_T& input, const out_T& def)
+out_T S2RV(const in_T& input, out_T def)
 {
-  out_T result = def;
-  S2A(input, result); // ignore return value
-  return result;
+  S2A(input, def); // ignore return value
+  return def;
 }
 
 /** Throwing version of S2RV().
@@ -177,7 +176,7 @@ out_T S2RV(const in_T& input, const out_T& def)
 template<typename out_T, typename in_T>
 out_T S2RV(const in_T& input)
 {
-  out_T result = out_T();
+  auto result = out_T();
   if (!S2A(input, result))
   {
     throw std::invalid_argument(
@@ -324,7 +323,7 @@ bool string2time(const in_T<char_T, traits, Allocator>& input, out_T& output)
     }
     else // still something left ...
     {
-      std::basic_string<char_T> the_rest;
+      auto the_rest = std::basic_string<char_T>();
       // read the rest and remove following whitespace (see below why)
       if ((iss >> the_rest >> std::ws).fail()) return false;
       // now we check if some garbage is left after the time-string.
@@ -395,7 +394,7 @@ bool string2time(const in_T<char_T, traits, Allocator>& input, out_T& output)
 
     if (!(iss >> std::ws).eof()) return false; // nothing else is allowed!
 
-    out_T the_rest = whole_seconds + fraction_of_second;
+    auto the_rest = whole_seconds + fraction_of_second;
 
     // the seconds part must be smaller than 60
     if (the_rest >= 60) return false;

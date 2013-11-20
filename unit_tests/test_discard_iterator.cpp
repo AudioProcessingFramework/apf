@@ -27,7 +27,7 @@
 
 #include "catch/catch.hpp"
 
-typedef apf::discard_iterator di;
+using di = apf::discard_iterator;
 
 TEST_CASE("iterators/discard_iterator"
     , "Test all functions of discard_iterator")
@@ -35,7 +35,7 @@ TEST_CASE("iterators/discard_iterator"
 
 SECTION("everything", "")
 {
-  di iter;
+  auto iter = di();
   ++iter;
   iter++;
   *iter = 42;

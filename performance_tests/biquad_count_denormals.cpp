@@ -55,9 +55,9 @@ struct Name : Prevention<T> { \
     << "%)." << std::endl;
 
 #define COUNT_DENORMALS(coeffs_flt, coeffs_dbl, name, prevention) { \
-  apf::Cascade<apf::BiQuad<float, name> > \
+  apf::Cascade<apf::BiQuad<float, name>> \
     cascade_flt(number_of_sections_count); \
-  apf::Cascade<apf::BiQuad<double, name> > \
+  apf::Cascade<apf::BiQuad<double, name>> \
     cascade_dbl(number_of_sections_count); \
   COUNT_DENORMALS_IN_CASCADE(coeffs_flt, cascade_flt, name, prevention) \
   COUNT_DENORMALS_IN_CASCADE(coeffs_dbl, cascade_dbl, name, prevention) \
@@ -68,7 +68,7 @@ int number_of_blocks_count = 200;
 int number_of_sections_count = 10;
 
 // denormal counter map
-std::map<std::string, std::pair<int, int> > denormal_counter;
+std::map<std::string, std::pair<int, int>> denormal_counter;
 
 // create denormal counter classes
 MAKE_DENORMAL_COUNTER(count_dc, apf::dp::dc)

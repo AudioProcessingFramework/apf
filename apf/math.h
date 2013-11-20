@@ -205,7 +205,7 @@ template<typename I>
 inline typename std::iterator_traits<I>::value_type
 max_amplitude(I begin, I end)
 {
-  typedef typename std::iterator_traits<I>::value_type T;
+  using T = typename std::iterator_traits<I>::value_type;
   return std::accumulate(begin, end, T()
       , [] (T current, T next) { return std::max(current, std::abs(next)); });
 }
@@ -218,7 +218,7 @@ max_amplitude(I begin, I end)
 template<typename I>
 inline typename std::iterator_traits<I>::value_type rms(I begin, I end)
 {
-  typedef typename std::iterator_traits<I>::value_type T;
+  using T = typename std::iterator_traits<I>::value_type;
 
   // inner product: sum of squares
   // divided by number: mean

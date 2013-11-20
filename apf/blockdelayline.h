@@ -44,9 +44,9 @@ template<typename T, typename Container = std::vector<T>>
 class BlockDelayLine
 {
   public:
-    typedef typename Container::size_type size_type;
-    typedef typename Container::pointer pointer;
-    typedef apf::circular_iterator<typename Container::iterator> circulator;
+    using size_type = typename Container::size_type;
+    using pointer = typename Container::pointer;
+    using circulator = apf::circular_iterator<typename Container::iterator>;
 
     BlockDelayLine(size_type block_size, size_type max_delay);
 
@@ -205,12 +205,12 @@ template<typename T, typename Container = std::vector<T>>
 class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
 {
   private:
-    typedef BlockDelayLine<T, Container> _base;
+    using _base = BlockDelayLine<T, Container>;
 
   public:
-    typedef typename _base::size_type size_type;
-    typedef typename _base::circulator circulator;
-    typedef typename circulator::difference_type difference_type;
+    using size_type = typename _base::size_type;
+    using circulator = typename _base::circulator;
+    using difference_type = typename circulator::difference_type;
 
     /// Constructor. @param initial_delay initial delay
     /// @param block_size Block size

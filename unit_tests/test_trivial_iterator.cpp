@@ -32,15 +32,15 @@ template<typename I>
 class trivial_iterator
 {
   private:
-    typedef trivial_iterator self;
+    using self = trivial_iterator;
 
   public:
-    typedef typename std::iterator_traits<I>::value_type value_type;
-    typedef typename std::iterator_traits<I>::pointer pointer;
-    typedef typename std::iterator_traits<I>::reference reference;
-    typedef typename std::iterator_traits<I>::difference_type difference_type;
-    typedef typename std::iterator_traits<I>::iterator_category
-                                                              iterator_category;
+    using value_type = typename std::iterator_traits<I>::value_type;
+    using pointer = typename std::iterator_traits<I>::pointer;
+    using reference = typename std::iterator_traits<I>::reference;
+    using difference_type = typename std::iterator_traits<I>::difference_type;
+    using iterator_category
+      = typename std::iterator_traits<I>::iterator_category;
 
     APF_ITERATOR_CONSTRUCTORS(trivial_iterator, I, _base_iterator)
     APF_ITERATOR_BASE(I, _base_iterator)

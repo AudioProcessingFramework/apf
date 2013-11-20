@@ -94,8 +94,8 @@ LockFreeFifo<T*>::push(T* item)
   // the _read_index is read the _write_index won't change before reading 
   // it, because it is modified only in this function. This won't work for
   // multiple readers/writers.  
-  size_t r = _read_index;
-  size_t w = _write_index;
+  auto r = _read_index;
+  auto w = _write_index;
 
   // Move write pointer by FIFO-size in order to compute the distance to 
   // the read pointer in next step. 
@@ -119,11 +119,13 @@ template<typename T>
 T*
 LockFreeFifo<T*>::pop()
 {
-  if (this->empty()) return nullptr;
+  T* retval = nullptr;
 
-  size_t r = _read_index;
+  if (this->empty()) return retval;
 
-  T* retval = _data[r];
+  auto r = _read_index;
+
+  retval = _data[r];
 
   // Set _read_index to next memory location (applying modulo operation)
   _read_index = ++r & _size_mask;

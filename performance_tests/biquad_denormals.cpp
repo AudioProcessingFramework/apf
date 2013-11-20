@@ -69,17 +69,17 @@ cascade.set(temp ## cascade.begin(), temp ## cascade.end());
   }
 
 #define TEST_BIQUAD(coeffs_flt, coeffs_dbl, prevention) { \
-  apf::Cascade<apf::BiQuad<float, prevention> > \
+  apf::Cascade<apf::BiQuad<float, prevention>> \
     cascade_test1_flt(number_of_sections_test1); \
-  apf::Cascade<apf::BiQuad<double, prevention> > \
+  apf::Cascade<apf::BiQuad<double, prevention>> \
     cascade_test1_dbl(number_of_sections_test1); \
-  apf::Cascade<apf::BiQuad<float, prevention> > \
+  apf::Cascade<apf::BiQuad<float, prevention>> \
     cascade_test2_flt(number_of_sections_test2); \
-  apf::Cascade<apf::BiQuad<double, prevention> > \
+  apf::Cascade<apf::BiQuad<double, prevention>> \
     cascade_test2_dbl(number_of_sections_test2); \
-  apf::Cascade<apf::BiQuad<float, prevention> > \
+  apf::Cascade<apf::BiQuad<float, prevention>> \
     cascade_test3_flt(number_of_sections_test3); \
-  apf::Cascade<apf::BiQuad<double, prevention> > \
+  apf::Cascade<apf::BiQuad<double, prevention>> \
     cascade_test3_dbl(number_of_sections_test3); \
   TEST_BIQUAD_INTERNAL(coeffs_flt, cascade_test1_flt, cascade_test2_flt, cascade_test3_flt, prevention) \
   TEST_BIQUAD_INTERNAL(coeffs_dbl, cascade_test1_dbl, cascade_test2_dbl, cascade_test3_dbl, prevention) \

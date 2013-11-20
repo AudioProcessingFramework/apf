@@ -46,10 +46,10 @@ filter_data[10] = 5.0f;
 filter_data[11] = 4.0f;
 filter_data[12] = 3.0f;
 
-size_t partitions = c::min_partitions(8, 16);
-c::Input conv_input(8, partitions);
-c::Filter filter(8, filter_data, filter_data + 16);
-c::Output conv_output(conv_input);
+auto partitions = c::min_partitions(8, 16);
+auto conv_input = c::Input(8, partitions);
+auto conv_output = c::Output(conv_input);
+auto filter = c::Filter(8, filter_data, filter_data + 16);
 
 float* result;
 
@@ -69,7 +69,7 @@ SECTION("silence", "")
 SECTION("impulse", "")
 {
   float one = 1.0f;
-  c::Filter impulse(8, &one, (&one)+1);
+  auto impulse = c::Filter(8, &one, (&one)+1);
 
   conv_input.add_block(test_signal);
   conv_output.set_filter(impulse);
@@ -134,8 +134,8 @@ SECTION("StaticOutput impulse", "")
 {
   float one = 1.0f;
 
-  c::Input sconv_input(8, 1);
-  c::StaticOutput sconv_output(sconv_input, &one, (&one)+1);
+  auto sconv_input = c::Input(8, 1);
+  auto sconv_output = c::StaticOutput(sconv_input, &one, (&one)+1);
 
   sconv_input.add_block(test_signal);
   result = sconv_output.convolve();
@@ -152,12 +152,12 @@ SECTION("StaticOutput frequency domain", "")
 {
   float one = 1.0f;
   // 3 partitions (only 1 is really needed), blocksize 8
-  c::Filter fd_filter(8, 3);
+  auto fd_filter = c::Filter(8, 3);
   // 7 partitions (just for fun), blocksize 8
-  c::Input sconv_input(8, 7);
+  auto sconv_input = c::Input(8, 7);
 
   conv_input.prepare_filter(&one, (&one)+1, fd_filter);
-  c::StaticOutput sconv_output(sconv_input, fd_filter);
+  auto sconv_output = c::StaticOutput(sconv_input, fd_filter);
 
   CHECK(sconv_input.partitions() == 7);
   CHECK(fd_filter.partitions() == 3);
@@ -170,13 +170,13 @@ SECTION("StaticOutput frequency domain", "")
 
 SECTION("combinations", "")
 {
-  c::StaticOutput so(conv_input, filter);
+  auto so = c::StaticOutput(conv_input, filter);
 
-  c::Convolver conv(8, partitions);
+  auto conv = c::Convolver(8, partitions);
   conv.set_filter(filter);
   conv.rotate_queues();
 
-  c::StaticConvolver sconv(filter, partitions);
+  auto sconv = c::StaticConvolver(filter, partitions);
 
   float input[8] = { 0.0f };
 

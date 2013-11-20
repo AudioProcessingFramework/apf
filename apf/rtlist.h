@@ -54,11 +54,11 @@ template<typename T>
 class RtList<T*> : NonCopyable
 {
   public:
-    typedef typename std::list<T*>          list_t;
-    typedef typename list_t::value_type     value_type;
-    typedef typename list_t::size_type      size_type;
-    typedef typename list_t::iterator       iterator;
-    typedef typename list_t::const_iterator const_iterator;
+    using list_t = typename std::list<T*>;
+    using value_type = typename list_t::value_type;
+    using size_type = typename list_t::size_type;
+    using iterator = typename list_t::iterator;
+    using const_iterator = typename list_t::const_iterator;
 
     class AddCommand;  // no implementation, use <T*>!
     class RemCommand;  // no implementation, use <T*>!
@@ -77,12 +77,7 @@ class RtList<T*> : NonCopyable
     /// the destructor is called. But if not, they are deleted here.
     ~RtList()
     {
-      for (iterator i = _the_actual_list.begin()
-          ; i != _the_actual_list.end()
-          ; ++i)
-      {
-        delete *i;
-      }
+      for (auto& delinquent: _the_actual_list) delete delinquent;
       _the_actual_list.clear();
     }
 
@@ -221,9 +216,9 @@ class RtList<T*>::RemCommand : public CommandQueue::Command
     /// @throw std::logic_error if item(s) is/are not found
     virtual void execute()
     {
-      for (iterator i = _delinquents.begin(); i != _delinquents.end(); ++i)
+      for (auto& i: _delinquents)
       {
-        iterator delinquent = std::find(_dst_list.begin(), _dst_list.end(), *i);
+        auto delinquent = std::find(_dst_list.begin(), _dst_list.end(), i);
         if (delinquent != _dst_list.end())
         {
           // Note: destruction order is reverse
@@ -241,10 +236,7 @@ class RtList<T*>::RemCommand : public CommandQueue::Command
     // for the operation to complete, otherwise.
     virtual void cleanup()
     {
-      for (iterator i = _splice_list.begin(); i != _splice_list.end(); ++i)
-      {
-        delete *i;
-      }
+      for (auto& delinquent: _splice_list) delete delinquent;
       _splice_list.clear();
     }
 
@@ -272,10 +264,7 @@ class RtList<T*>::ClearCommand : public CommandQueue::Command
 
     virtual void cleanup()
     {
-      for (iterator i = _delinquents.begin(); i != _delinquents.end(); ++i)
-      {
-        delete *i;
-      }
+      for (auto& delinquent: _delinquents) delete delinquent;
       _delinquents.clear();
     }
 

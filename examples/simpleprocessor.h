@@ -45,11 +45,11 @@ class SimpleProcessor : public apf::MimoProcessor<SimpleProcessor
              , public apf::has_begin_and_end<MimoProcessorBase::Input::iterator>
     {
       private:
-        typedef apf::has_begin_and_end<MimoProcessorBase::Input::iterator>
-          _begin_end_base;
+        using _begin_end_base
+          = apf::has_begin_and_end<MimoProcessorBase::Input::iterator>;
 
       public:
-        typedef _begin_end_base::iterator iterator;
+        using iterator = _begin_end_base::iterator;
 
         explicit Input(const Params& p)
           : MimoProcessorBase::Input(p)
@@ -84,7 +84,7 @@ class SimpleProcessor : public apf::MimoProcessor<SimpleProcessor
 class SimpleProcessor::Output : public MimoProcessorBase::DefaultOutput
 {
   public:
-    typedef MimoProcessorBase::Output::Params Params;
+    using Params = MimoProcessorBase::Output::Params;
 
     explicit Output(const Params& p)
       : MimoProcessorBase::DefaultOutput(p)
@@ -141,7 +141,7 @@ SimpleProcessor::SimpleProcessor(const apf::parameter_map& p)
 
   Output::Params op;
   std::string out_port_prefix = p.get("out_port_prefix", "");
-  int out_ch = p.get<int>("out_channels");
+  auto out_ch = p.get<int>("out_channels");
   for (int i = 1; i <= out_ch; ++i)
   {
     op.set("id", i);

@@ -50,10 +50,11 @@
 
 // The single entry-point for Matlab is the function mexFunction(), see below!
 
+using sample_type = SimpleProcessor::sample_type;
+
 // global variables holding the state
 std::unique_ptr<SimpleProcessor> engine;
 mwSize in_channels, out_channels, threads=1, block_size=64, sample_rate=44100;
-typedef SimpleProcessor::sample_type sample_type;
 std::vector<sample_type*> inputs, outputs;
 
 void engine_init(int nrhs, const mxArray* prhs[])
@@ -105,7 +106,7 @@ void engine_init(int nrhs, const mxArray* prhs[])
 #endif
       , in_channels, out_channels, threads, block_size, sample_rate);
 
-  apf::parameter_map temp;
+  auto temp = apf::parameter_map();
   temp.set("in_channels", in_channels);
   temp.set("out_channels", out_channels);
   temp.set("threads", threads);
@@ -180,11 +181,11 @@ void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-  std::string command;
+  auto command = std::string();
 
   if (nrhs >= 1 && mxIsChar(prhs[0]))
   {
-    char* temp = mxArrayToString(prhs[0]);
+    auto temp = mxArrayToString(prhs[0]);
     command = temp;
     mxFree(temp);
     --nrhs;

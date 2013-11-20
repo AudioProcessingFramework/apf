@@ -27,7 +27,7 @@
 
 #include "catch/catch.hpp"
 
-typedef apf::index_iterator<int> ii;
+using ii = apf::index_iterator<int>;
 
 TEST_CASE("iterators/index_iterator", "Test all functions of index_iterator")
 {
@@ -38,8 +38,8 @@ it = ii();
 
 SECTION("copy ctor, assignment", "X b(a); b=a;")
 {
-  ii iter1(42);
-  ii iter2(iter1);
+  auto iter1 = ii(42);
+  auto iter2 = ii(iter1);
   ii iter3;
   iter3 = iter1;
 
@@ -49,9 +49,9 @@ SECTION("copy ctor, assignment", "X b(a); b=a;")
 
 SECTION("comparisons", "a == b; a != b, a < b, ...")
 {
-  ii iter1(4);
-  ii iter2(4);
-  ii iter3(5);
+  auto iter1 = ii(4);
+  auto iter2 = ii(4);
+  auto iter3 = ii(5);
 
   CHECK(iter1 == iter2);
   CHECK(iter2 != iter3);
@@ -73,7 +73,7 @@ SECTION("comparisons", "a == b; a != b, a < b, ...")
 
 SECTION("dereference", "*a; a[]")
 {
-  ii iter(4);
+  auto iter = ii(4);
 
   CHECK(*iter == 4);
 
@@ -84,7 +84,7 @@ SECTION("dereference", "*a; a[]")
 
 SECTION("increment, decrement", "++a; a++; *a++; --a; a--; *a--")
 {
-  ii iter1(0);
+  auto iter1 = ii(0);
   ii iter2;
 
   CHECK(*iter1++ == 0);

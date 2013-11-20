@@ -31,7 +31,7 @@
 #include <cstdio>  // for printf()
 #endif
 
-#include <cassert> // for assert()
+#include <cassert>  // for assert()
 
 #include "apf/jackclient.h"
 #include "apf/parameter_map.h"
@@ -52,7 +52,7 @@ namespace apf
 class jack_policy : public JackClient
 {
   public:
-    typedef sample_t sample_type;
+    using sample_type = sample_t;
     class Input;
     class Output;
 
@@ -70,14 +70,14 @@ class jack_policy : public JackClient
       : JackClient(p.get("name", "MimoProcessor"), use_jack_process_callback)
     {}
 
-    virtual ~jack_policy() {}
+    virtual ~jack_policy() = default;
 
   private:
     template<typename X> class Xput;
 
     struct i_am_in
     {
-      typedef const sample_type* iterator;
+      using iterator = const sample_type*;
       static const bool is_input = true;
       static std::string prefix_name() { return "input_prefix"; }
       static std::string default_prefix() { return "in_"; }
@@ -85,7 +85,7 @@ class jack_policy : public JackClient
 
     struct i_am_out
     {
-      typedef sample_type* iterator;
+      using iterator = sample_type*;
       static const bool is_input = false;
       static std::string prefix_name() { return "output_prefix"; }
       static std::string default_prefix() { return "out_"; }
@@ -146,7 +146,7 @@ template<typename X>
 class jack_policy::Xput
 {
   public:
-    typedef typename X::iterator iterator;
+    using iterator = typename X::iterator;
 
     struct buffer_type : has_begin_and_end<iterator> { friend class Xput; };
 
@@ -181,7 +181,7 @@ template<typename X>
 JackClient::port_t*
 jack_policy::Xput<X>::_init_port(const parameter_map& p, jack_policy& parent)
 {
-  std::string name;
+  auto name = std::string();
 
   // first, try port_name
   if (p.has_key("port_name"))
@@ -194,7 +194,7 @@ jack_policy::Xput<X>::_init_port(const parameter_map& p, jack_policy& parent)
     // if the prefix isn't specified, it's replaced by a default string
     // worst case: duplicate string -> port registration will fail!
 
-    std::string id;
+    auto id = std::string();
 
     if (p.has_key("id"))
     {
@@ -242,7 +242,7 @@ class jack_policy::Input : public Xput<i_am_in>
       : Xput<i_am_in>(parent, p)
     {}
 
-    ~Input() {}
+    ~Input() = default;
 };
 
 class jack_policy::Output : public Xput<i_am_out>
@@ -252,7 +252,7 @@ class jack_policy::Output : public Xput<i_am_out>
       : Xput<i_am_out>(parent, p)
     {}
 
-    ~Output() {}
+    ~Output() = default;
 };
 
 }  // namespace apf

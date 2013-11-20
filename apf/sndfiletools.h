@@ -50,7 +50,7 @@ inline SndfileHandle load_sndfile(const std::string& name, size_t sample_rate
     throw std::logic_error("apf::load_sndfile(): Empty file name!");
   }
 
-  SndfileHandle handle(name, SFM_READ);
+  auto handle = SndfileHandle(name, SFM_READ);
 
 #if 0
   // rawHandle() is available since libsndfile version 1.0.24

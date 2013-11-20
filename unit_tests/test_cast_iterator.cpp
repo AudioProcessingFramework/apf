@@ -29,7 +29,7 @@
 #include "catch/catch.hpp"
 
 struct dummy_type {};
-typedef apf::cast_iterator<dummy_type, int*> ci;
+using ci = apf::cast_iterator<dummy_type, int*>;
 
 struct Base {};
 
@@ -61,10 +61,10 @@ ITERATOR_TEST_SECTION_LESS(ci, int)
 
 SECTION("dereference", "*a; a->m; a[n]")
 {
-  Derived d1(42);
+  auto d1 = Derived(42);
   Base* pb = &d1;
 
-  apf::cast_iterator<Derived, Base**> iter(&pb);
+  auto iter = apf::cast_iterator<Derived, Base**>(&pb);
 
   Derived d2 = *iter;
   Derived d3 = iter[0];
@@ -85,10 +85,10 @@ SECTION("dereference", "*a; a->m; a[n]")
 
 SECTION("dereference and increment", "*a++")
 {
-  Derived d(42);
+  auto d = Derived(42);
   Base* pb = &d;
 
-  apf::cast_iterator<Derived, Base**> iter(&pb);
+  auto iter = apf::cast_iterator<Derived, Base**>(&pb);
 
   Derived d2 = *iter++;
 
@@ -99,11 +99,11 @@ SECTION("dereference and increment", "*a++")
 
 SECTION("offset dereference", "a[n]")
 {
-  Derived d(42);
+  auto d = Derived(42);
 
   Base* b[] = { nullptr, nullptr, &d };
 
-  apf::cast_iterator<Derived, Base**> iter(b);
+  auto iter = apf::cast_iterator<Derived, Base**>(b);
 
   Derived d2 = iter[2];
   CHECK(d2._n == 42);
@@ -112,11 +112,11 @@ SECTION("offset dereference", "a[n]")
 SECTION("test make_cast_iterator", "namespace-level helper function")
 {
   int n = 5;
-  ci iter = apf::make_cast_iterator<dummy_type>(&n);
+  auto iter = apf::make_cast_iterator<dummy_type>(&n);
   CHECK(iter.base() == &n);
 }
 
-typedef std::vector<Base*> vb;
+using vb = std::vector<Base*>;
 vb b;
 b.push_back(new Derived(1));
 b.push_back(new Derived(2));
@@ -124,7 +124,7 @@ b.push_back(new Derived(3));
 
 SECTION("test cast_proxy", "")
 {
-  apf::cast_proxy<Derived, vb> p(b);
+  auto p = apf::cast_proxy<Derived, vb>(b);
 
   CHECK(p.size() == 3);
   CHECK(p.begin()->_n == 1);
@@ -139,7 +139,7 @@ SECTION("test cast_proxy", "")
 
 SECTION("test cast_proxy_const", "")
 {
-  apf::cast_proxy_const<Derived, vb> p(b);
+  auto p = apf::cast_proxy_const<Derived, vb>(b);
 
   CHECK(p.size() == 3);
   CHECK(p.begin()->_n == 1);

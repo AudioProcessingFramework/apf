@@ -23,6 +23,8 @@
 
 // Tests for BiQuad and Cascade.
 
+// see also ../performance_tests/biquad_*.cpp
+
 #include "apf/biquad.h"
 
 #include "catch/catch.hpp"
@@ -34,16 +36,17 @@ TEST_CASE("BiQuad", "Test BiQuad")
 
 SECTION("basic", "only instantiations and very basic stuff")
 {
-  apf::BiQuad<double> a;
-  apf::BiQuad<float> b;
+  auto a = apf::BiQuad<double>();
+  auto b = apf::BiQuad<float>();
+  (void)b;
 
-  apf::SosCoefficients<double> c(0.1, 0.1, 0.1, 0.1, 0.1);
+  auto c = apf::SosCoefficients<double>(0.1, 0.1, 0.1, 0.1, 0.1);
   a = c;
 
   CHECK(a.b0 == 0.1);
 
-  apf::Cascade<apf::BiQuad<double>> d(25);
-  apf::Cascade<apf::BiQuad<float>> e(25);
+  auto d = apf::Cascade<apf::BiQuad<double>>(25);
+  auto e = apf::Cascade<apf::BiQuad<float>>(25);
 }
 
 } // TEST_CASE

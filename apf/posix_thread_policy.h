@@ -68,7 +68,7 @@ namespace apf
 class posix_thread_policy
 {
   public:
-    typedef useconds_t useconds_type;
+    using useconds_type = useconds_t;
 
     template<typename F> class ScopedThread;
     template<typename F> class DetachedThread;
@@ -76,8 +76,8 @@ class posix_thread_policy
     class Semaphore;
 
   protected:
-     posix_thread_policy() {}  ///< Protected ctor.
-    ~posix_thread_policy() {}  ///< Protected dtor.
+     posix_thread_policy() = default;  ///< Protected ctor.
+    ~posix_thread_policy() = default;  ///< Protected dtor.
 
   private:
     class ThreadBase;
@@ -86,7 +86,7 @@ class posix_thread_policy
 class posix_thread_policy::ThreadBase
 {
   public:
-    typedef pthread_t native_handle_type;
+    using native_handle_type = pthread_t;
 
     void create(void* (*f)(void*), void* data)
     {
@@ -204,7 +204,7 @@ class posix_thread_policy::Lock : NonCopyable
 class posix_thread_policy::Semaphore : NonCopyable
 {
   public:
-    typedef unsigned int value_type;
+    using value_type = unsigned int;
 
     explicit Semaphore(value_type value = 0)
 #ifdef APF_PSEUDO_UNNAMED_SEMAPHORES

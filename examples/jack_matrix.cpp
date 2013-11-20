@@ -30,20 +30,19 @@
 #include "apf/jack_policy.h"
 #include "apf/posix_thread_policy.h"
 #include "apf/container.h"  // for fixed_matrix
-#include "apf/iterator.h"  // for cast_iterator
 
 class MatrixProcessor : public apf::MimoProcessor<MatrixProcessor
                         , apf::jack_policy
                         , apf::posix_thread_policy>
 {
   public:
-    typedef apf::fixed_matrix<sample_type> matrix_t;
-    typedef matrix_t::channel_iterator channel_iterator;
-    typedef matrix_t::slice_iterator slice_iterator;
-    typedef matrix_t::Channel Channel;
-    typedef matrix_t::Slice Slice;
+    using matrix_t = apf::fixed_matrix<sample_type>;
+    using channel_iterator = matrix_t::channel_iterator;
+    using slice_iterator = matrix_t::slice_iterator;
+    using Channel = matrix_t::Channel;
+    using Slice = matrix_t::Slice;
 
-    typedef MimoProcessorBase::DefaultInput Input;
+    using Input = MimoProcessorBase::DefaultInput;
 
     class m1_channel;
     class m2_channel;
@@ -128,7 +127,7 @@ class MatrixProcessor::m1_channel : public ProcessItem<m1_channel>
     APF_PROCESS(m1_channel, ProcessItem<m1_channel>)
     {
       assert(_input != nullptr);
-      Input::iterator begin = _input->begin() + _part * _part_size;
+      auto begin = _input->begin() + _part * _part_size;
       std::copy(begin, begin + _part_size, _channel.begin());
     }
 
@@ -210,15 +209,13 @@ class MatrixProcessor::Output : public MimoProcessorBase::DefaultOutput
 
     APF_PROCESS(Output, MimoProcessorBase::DefaultOutput)
     {
-      Output::iterator out = this->begin();
+      auto out = this->begin();
 
-      for (std::list<Channel>::iterator it = _channel_list.begin()
-          ; it != _channel_list.end()
-          ; ++it)
+      for (const auto& ch: _channel_list)
       {
-        for (channel_iterator i = it->begin(); i != it->end(); ++i)
+        for (const auto& sample: ch)
         {
-          *out++ = *i;
+          *out++ = sample;
         }
       }
     }
@@ -259,11 +256,9 @@ MatrixProcessor::MatrixProcessor(const apf::parameter_map& p)
   // m1: input channels are split up in more (and smaller) channels
 
   m1_channel::Setup m1_setup(_parts, _part_length, this->get_input_list());
-  for (matrix_t::channels_iterator i = _m1.channels.begin()
-      ; i != _m1.channels.end()
-      ; ++i)
+  for (const auto& ch: _m1.channels)
   {
-    _m1_list.add(m1_setup(*i));
+    _m1_list.add(m1_setup(ch));
   }
 
   // m2: reading slices from first matrix and writing to channels of second
@@ -284,7 +279,7 @@ MatrixProcessor::MatrixProcessor(const apf::parameter_map& p)
   // set parameters for all outputs ...
   Output::Params op;
   op.parent = this;
-  matrix_t::channels_iterator next_channel = _m3.channels.begin();
+  auto next_channel = _m3.channels.begin();
   for (int i = 1; i <= _channels; ++i)
   {
     op.set("id", i);

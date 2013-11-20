@@ -28,7 +28,7 @@
 
 #include "catch/catch.hpp"
 
-typedef apf::accumulating_iterator<int*> ai;
+using ai = apf::accumulating_iterator<int*>;
 
 TEST_CASE("iterators/accumulating_iterator"
     , "Test all functions of accumulating_iterator")
@@ -42,7 +42,7 @@ ITERATOR_TEST_SECTION_INCREMENT(ai, int)
 SECTION("dereference/increment", "*a, *a++")
 {
   int n = 5;
-  ai iter(&n);
+  auto iter = ai(&n);
 
   *iter = 4;
 
@@ -59,7 +59,7 @@ SECTION("dereference/increment", "*a, *a++")
 SECTION("test make_accumulating_iterator", "namespace-level helper function")
 {
   int n = 5;
-  ai iter = apf::make_accumulating_iterator(&n);
+  auto iter = apf::make_accumulating_iterator(&n);
   CHECK(iter.base() == &n);
 }
 

@@ -159,7 +159,7 @@ SECTION("next_power_of_2", "")
 
 SECTION("max_amplitude", "")
 {
-  std::vector<double> sig(5);
+  auto sig = std::vector<double>(5);
 
   CHECK(max_amplitude(sig.begin(), sig.end()) == 0.0);
 
@@ -172,7 +172,7 @@ SECTION("max_amplitude", "")
 
 SECTION("rms", "")
 {
-  std::vector<double> sig(5);
+  auto sig = std::vector<double>(5);
 
   CHECK(rms(sig.begin(), sig.end()) == 0.0);
 
@@ -187,21 +187,21 @@ SECTION("rms", "")
 
 SECTION("raised_cosine", "")
 {
-  raised_cosine<float> rc1(1.5f);
+  auto rc1 = raised_cosine<float>(1.5f);
   CHECK(rc1(0.75f) == 0.0f);
   CHECK(rc1(1.5f) == 1.0f);
 
-  raised_cosine<double> rc2(1.5);
+  auto rc2 = raised_cosine<double>(1.5);
   CHECK(rc2(0.75) == 0.0);
   CHECK(rc2(1.5) == 1.0);
 
-  raised_cosine<double> rc3(360);
+  auto rc3 = raised_cosine<double>(360);
   CHECK(rc3(60) == 0.75);
 }
 
 SECTION("linear_interpolator", "")
 {
-  linear_interpolator<double> in(1.5, 3.0, 3.0);
+  auto in = linear_interpolator<double>(1.5, 3.0, 3.0);
   CHECK(in(0.0) == 1.5);
   CHECK(in(1.0) == 2.0);
   CHECK(in(2.0) == 2.5);
@@ -215,14 +215,14 @@ SECTION("linear_interpolator", "")
 
 SECTION("linear_interpolator, integer index", "")
 {
-  linear_interpolator<double, int> in(5.0, 6.0, 2);
+  auto in = linear_interpolator<double, int>(5.0, 6.0, 2);
   CHECK(in(0) == 5.0);
   CHECK(in(1) == 5.5);
 }
 
 SECTION("linear_interpolator, integer index converted to double", "")
 {
-  linear_interpolator<double> in(1.0, 2.0, 4);
+  auto in = linear_interpolator<double>(1.0, 2.0, 4);
   CHECK(in(0) == 1.0);
   CHECK(in(1) == 1.25);
 }

@@ -46,7 +46,7 @@ template<typename T> struct fftw {};  // Most general case is empty, see below!
 /** @see APF_FFTW_TRAITS **/ \
 template<> \
 struct fftw<longtype> { \
-  typedef fftw ## shorttype ## plan plan; \
+  using plan = fftw ## shorttype ## plan; \
   static void* malloc(size_t n) { return fftw ## shorttype ## malloc(n); } \
   static void free(void* p) { fftw ## shorttype ## free(p); } \
   static void destroy_plan(plan p) { \
@@ -81,13 +81,13 @@ APF_FFTW_TRAITS(long double, l_)
 template<typename T>
 struct fftw_allocator
 {
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  typedef T* pointer;
-  typedef const T* const_pointer;
-  typedef T& reference;
-  typedef const T& const_reference;
-  typedef T value_type;
+  using size_type = size_t;
+  using difference_type = ptrdiff_t;
+  using pointer = T*;
+  using const_pointer = const T*;
+  using reference = T&;
+  using const_reference = const T&;
+  using value_type = T;
 
   pointer allocate(size_type n, const void* hint = nullptr)
   {
@@ -110,7 +110,7 @@ struct fftw_allocator
   }
 
   template<typename U>
-  struct rebind { typedef fftw_allocator<U> other; };
+  struct rebind { using other = fftw_allocator<U>; };
 
   // Not sure if the following are necessary ...
 

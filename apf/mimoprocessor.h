@@ -117,7 +117,7 @@ class MimoProcessor : public interface_policy
                     , NonCopyable
 {
   public:
-    typedef typename interface_policy::sample_type sample_type;
+    using sample_type = typename interface_policy::sample_type;
     using query_policy::_query_fifo;
 
     class Input;
@@ -160,7 +160,7 @@ class MimoProcessor : public interface_policy
       }
     };
 
-    typedef RtList<Item*> rtlist_t;
+    using rtlist_t = RtList<Item*>;
 
     /// Proxy class for accessing an RtList.
     /// @note This is for read-only access. Write access is only allowed in the
@@ -267,8 +267,8 @@ class MimoProcessor : public interface_policy
     template<typename P>
     typename P::outer* add(const P& p)
     {
-      typedef typename P::outer X;
-      P temp = p;
+      using X = typename P::outer;
+      auto temp = p;
       temp.parent = &this->derived();
       return static_cast<X*>(_add_helper(new X(temp)));
     }
@@ -289,10 +289,10 @@ class MimoProcessor : public interface_policy
     }
 
   protected:
-    typedef APF_MIMOPROCESSOR_BASE MimoProcessorBase;
+    using MimoProcessorBase = APF_MIMOPROCESSOR_BASE;
 
-    typedef typename rtlist_t::iterator       rtlist_iterator;
-    typedef typename rtlist_t::const_iterator rtlist_const_iterator;
+    using rtlist_iterator = typename rtlist_t::iterator;
+    using rtlist_const_iterator = typename rtlist_t::const_iterator;
 
     struct Process { Process(Derived&) {} };
 
@@ -317,8 +317,8 @@ class MimoProcessor : public interface_policy
     class WorkerThread : NonCopyable
     {
       private:
-        typedef typename thread_policy::template DetachedThread<
-          WorkerThreadFunction> Thread;
+        using Thread = typename thread_policy::template DetachedThread<
+          WorkerThreadFunction>;
 
       public:
         WorkerThread(std::pair<int, MimoProcessor*> in)
@@ -383,8 +383,6 @@ class MimoProcessor : public interface_policy
 
     Input* _add_helper(Input* in) { return _input_list.add(in); }
     Output* _add_helper(Output* out) { return _output_list.add(out); }
-
-    template<typename T> struct _empty_type {};
 
     // TODO: make "volatile"?
     rtlist_t* _current_list;
@@ -477,18 +475,12 @@ APF_MIMOPROCESSOR_BASE::_process_current_list_in_main_thread()
   if (_current_list->empty()) return;
 
   // wake all threads
-  for (auto& it: _thread_data)
-  {
-    it.cont_semaphore.post();
-  }
+  for (auto& it: _thread_data) it.cont_semaphore.post();
 
   _process_selected_items_in_current_list(0);
 
   // wait for worker threads
-  for (auto& it: _thread_data)
-  {
-    it.wait_semaphore.wait();
-  }
+  for (auto& it: _thread_data) it.wait_semaphore.wait();
 }
 
 APF_MIMOPROCESSOR_TEMPLATES
@@ -531,7 +523,7 @@ class APF_MIMOPROCESSOR_BASE::Input : public Xput
     struct Params : Xput::Params
     {
       using Xput::Params::operator=;
-      typedef typename Derived::Input outer;  // see add()
+      using outer = typename Derived::Input;  // see add()
     };
 
     struct Process { Process(Input&) {} };
@@ -554,8 +546,8 @@ APF_MIMOPROCESSOR_TEMPLATES
 class APF_MIMOPROCESSOR_BASE::DefaultInput : public Input
 {
   public:
-    typedef typename Input::Params Params;
-    typedef typename Input::iterator iterator;
+    using Params = typename Input::Params;
+    using iterator = typename Input::iterator;
 
     DefaultInput(const Params& p) : Input(p) {}
 
@@ -573,7 +565,7 @@ class APF_MIMOPROCESSOR_BASE::Output : public Xput
     struct Params : Xput::Params
     {
       using Xput::Params::operator=;
-      typedef typename Derived::Output outer;  // see add()
+      using outer = typename Derived::Output;  // see add()
     };
 
     struct Process { Process(Output&) {} };
@@ -596,8 +588,8 @@ APF_MIMOPROCESSOR_TEMPLATES
 class APF_MIMOPROCESSOR_BASE::DefaultOutput : public Output
 {
   public:
-    typedef typename Output::Params Params;
-    typedef typename Output::iterator iterator;
+    using Params = typename Output::Params;
+    using iterator = typename Output::iterator;
 
     DefaultOutput(const Params& p) : Output(p) {}
 

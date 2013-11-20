@@ -32,7 +32,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor
       , apf::jack_policy, apf::posix_thread_policy>
 {
   public:
-    typedef MimoProcessorBase::DefaultInput Input;
+    using Input = MimoProcessorBase::DefaultInput;
     class Output;
 
     MyProcessor();

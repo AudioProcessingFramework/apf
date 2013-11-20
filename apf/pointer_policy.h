@@ -50,7 +50,7 @@ template<typename T>
 class pointer_policy<T*>
 {
   public:
-    typedef T sample_type;
+    using sample_type = T;
 
     class Input;
     class Output;
@@ -77,7 +77,7 @@ class pointer_policy<T*>
       , _out(0)
     {}
 
-    virtual ~pointer_policy() {}
+    virtual ~pointer_policy() = default;
 
   private:
     virtual void process() = 0;
@@ -125,7 +125,7 @@ template<typename T>
 class pointer_policy<T*>::Input
 {
   public:
-    typedef T const* iterator;
+    using iterator = T const*;
 
     struct buffer_type : has_begin_and_end<iterator> { friend class Input; };
 
@@ -143,7 +143,7 @@ class pointer_policy<T*>::Input
       , _id(_parent.get_next_input_id())
     {}
 
-    ~Input() {}
+    ~Input() = default;
 
   private:
     Input(const Input&); Input& operator=(const Input&);  // deactivated
@@ -156,7 +156,7 @@ template<typename T>
 class pointer_policy<T*>::Output
 {
   public:
-    typedef T* iterator;
+    using iterator = T*;
 
     struct buffer_type : has_begin_and_end<iterator> { friend class Output; };
 
@@ -174,7 +174,7 @@ class pointer_policy<T*>::Output
       , _id(_parent.get_next_output_id())
     {}
 
-    ~Output() {}
+    ~Output() = default;
 
   private:
     Output(const Output&); Output& operator=(const Output&);  // deactivated

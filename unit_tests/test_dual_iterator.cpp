@@ -30,7 +30,7 @@
 TEST_CASE("iterators/dual_iterator", "Test all functions of dual_iterator")
 {
 
-typedef apf::dual_iterator<int*, int*> di;
+using di = apf::dual_iterator<int*, int*>;
 
 int x[] = { 0, 0 };
 int y[] = { 0, 0 };
@@ -43,9 +43,9 @@ SECTION("default ctor", "")
 
 SECTION("copy ctor, assignment", "X b(a); b=a;")
 {
-  di iter1(x, y);
-  di iter2(iter1);
-  di iter3 = iter1;
+  auto iter1 = di(x, y);
+  auto iter2 = di(iter1);
+  auto iter3 = iter1;  // same as above
   (void)iter2;
   (void)iter3;
   di iter4;
@@ -56,7 +56,7 @@ SECTION("copy ctor, assignment", "X b(a); b=a;")
 
 SECTION("dereference/increment", "*a, *a++")
 {
-  di iter(x, y);
+  auto iter = di(x, y);
 
   *iter++ = 1;
 
@@ -71,8 +71,8 @@ SECTION("dereference/increment", "*a, *a++")
 
 SECTION("(un)equality", "... and pre/post-increment")
 {
-  di iter1(x, y);
-  di iter2(x, y);
+  auto iter1 = di(x, y);
+  auto iter2 = di(x, y);
 
   ++iter1;
 
@@ -87,7 +87,7 @@ SECTION("(un)equality", "... and pre/post-increment")
 
 SECTION("test make_dual_iterator", "... and assignment")
 {
-  di iter = apf::make_dual_iterator(x, y);
+  auto iter = apf::make_dual_iterator(x, y);
   *iter = 1;
   CHECK(*x == 1);
   CHECK(*y == 1);
@@ -97,7 +97,7 @@ SECTION("dual_iterator assign from std::pair", "")
 {
   int i = 5;
   double d = 6;
-  apf::dual_iterator<int*, double*> iter = apf::make_dual_iterator(&i, &d);
+  auto iter = apf::make_dual_iterator(&i, &d);
   *iter = std::make_pair(2, 3.0);
   CHECK(i == 2);
   CHECK(d == 3.0);
@@ -107,7 +107,7 @@ SECTION("dual_iterator assign to std::pair", "")
 {
   int i = 5;
   double d = 6;
-  apf::dual_iterator<int*, double*> iter = apf::make_dual_iterator(&i, &d);
+  auto iter = apf::make_dual_iterator(&i, &d);
   // The pair types don't have to match exactly:
   std::pair<long int, long double> p = *iter;
   CHECK(p.first == 5);
@@ -116,7 +116,7 @@ SECTION("dual_iterator assign to std::pair", "")
 
 SECTION("dereference ... and do stuff", "+=")
 {
-  di iter = apf::make_dual_iterator(x, y);
+  auto iter = apf::make_dual_iterator(x, y);
 
   *iter += 5;
   CHECK(*x == 5);

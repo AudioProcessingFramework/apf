@@ -27,7 +27,7 @@
 #include "iterator_test_macros.h"
 #include "catch/catch.hpp"
 
-typedef apf::circular_iterator<int*> ci;
+using ci = apf::circular_iterator<int*>;
 
 TEST_CASE("iterators/circular_iterator/1"
     , "Test all straightforward functions of circular_iterator")

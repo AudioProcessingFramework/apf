@@ -69,8 +69,8 @@ template<typename Derived, typename ListProxy, typename Out>
 class CombineChannelsBase : public CRTP<Derived>
 {
   protected:
-    typedef typename std::iterator_traits<typename std::remove_reference<
-      ListProxy>::type::value_type::iterator>::value_type T;
+    using T = typename std::iterator_traits<typename std::remove_reference<
+      ListProxy>::type::value_type::iterator>::value_type;
 
   public:
     /// Constructor.
@@ -97,26 +97,23 @@ class CombineChannelsBase : public CRTP<Derived>
 
       this->derived().before_the_loop();
 
-      for (typename std::remove_reference<ListProxy>::type::iterator item
-          = _in.begin()
-          ; item != _in.end()
-          ; ++item)
+      for (auto& item: _in)
       {
         using namespace CombineChannelsResult;
 
-        switch (_selection = f.select(*item))
+        switch (_selection = f.select(item))
         {
           case nothing:
             continue;  // jump to next list item
 
           case constant:
-            this->derived().case_one(*item, f);
+            this->derived().case_one(item, f);
             break;
 
           case change:
           case fade_in:
           case fade_out:
-            this->derived().case_two(*item, f);
+            this->derived().case_two(item, f);
             break;
 
           default:
@@ -194,7 +191,7 @@ class CombineChannelsCopy : public CombineChannelsBase<
                                             CombineChannelsCopy<L, Out>, L, Out>
 {
   private:
-    typedef CombineChannelsBase<CombineChannelsCopy<L, Out>, L, Out> _base;
+    using _base = CombineChannelsBase<CombineChannelsCopy<L, Out>, L, Out>;
 
   public:
     CombineChannelsCopy(const L& in, Out& out) : _base(in, out) {}
@@ -215,7 +212,7 @@ class CombineChannels: public CombineChannelsBase<
                                                 CombineChannels<L, Out>, L, Out>
 {
   private:
-    typedef CombineChannelsBase<CombineChannels<L, Out>, L, Out> _base;
+    using _base = CombineChannelsBase<CombineChannels<L, Out>, L, Out>;
 
   public:
     CombineChannels(const L& in, Out& out) : _base(in, out) {}
@@ -236,9 +233,9 @@ class CombineChannelsInterpolation: public CombineChannelsBase<
                                    CombineChannelsInterpolation<L, Out>, L, Out>
 {
   private:
-    typedef CombineChannelsBase<CombineChannelsInterpolation<L, Out>, L, Out>
-      _base;
-    typedef typename _base::T T;
+    using _base
+      = CombineChannelsBase<CombineChannelsInterpolation<L, Out>, L, Out>;
+    using T = typename _base::T;
     using _base::_selection;
     using _base::_accumulate;
     using _base::_out;
@@ -279,8 +276,8 @@ template<typename Derived, typename L, typename Out, typename Crossfade>
 class CombineChannelsCrossfadeBase : public CombineChannelsBase<Derived, L, Out>
 {
   private:
-    typedef CombineChannelsBase<Derived, L, Out> _base;
-    typedef typename _base::T T;
+    using _base = CombineChannelsBase<Derived, L, Out>;
+    using T = typename _base::T;
     using _base::_accumulate;
     using _base::_out;
 
@@ -352,8 +349,8 @@ class CombineChannelsCrossfadeCopy : public CombineChannelsCrossfadeBase<
              CombineChannelsCrossfadeCopy<L, Out, Crossfade>, L, Out, Crossfade>
 {
   private:
-    typedef CombineChannelsCrossfadeBase<CombineChannelsCrossfadeCopy<
-      L, Out, Crossfade>, L, Out, Crossfade> _base;
+    using _base = CombineChannelsCrossfadeBase<CombineChannelsCrossfadeCopy<
+      L, Out, Crossfade>, L, Out, Crossfade>;
 
     using _base::_fade_out_buffer;
     using _base::_fade_in_buffer;
@@ -413,8 +410,8 @@ class CombineChannelsCrossfade : public CombineChannelsCrossfadeBase<
                  CombineChannelsCrossfade<L, Out, Crossfade>, L, Out, Crossfade>
 {
   private:
-    typedef CombineChannelsCrossfadeBase<CombineChannelsCrossfade<
-      L, Out, Crossfade>, L, Out, Crossfade> _base;
+    using _base = CombineChannelsCrossfadeBase<CombineChannelsCrossfade<
+      L, Out, Crossfade>, L, Out, Crossfade>;
     using _base::_selection;
     using _base::_accumulate_fade_in;
     using _base::_accumulate_fade_out;
@@ -474,12 +471,12 @@ template<typename T>
 class raised_cosine_fade
 {
   private:
-    typedef transform_iterator<index_iterator<T>, math::raised_cosine<T>>
-      iterator_type;
+    using iterator_type
+      = transform_iterator<index_iterator<T>, math::raised_cosine<T>>;
 
   public:
-    typedef typename std::vector<T>::const_iterator iterator;
-    typedef typename std::vector<T>::const_reverse_iterator reverse_iterator;
+    using iterator = typename std::vector<T>::const_iterator;
+    using reverse_iterator = typename std::vector<T>::const_reverse_iterator;
 
     raised_cosine_fade(size_t block_size)
       : _crossfade_data(
