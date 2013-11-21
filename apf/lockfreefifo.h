@@ -29,6 +29,7 @@
 
 #include "apf/math.h"  // for next_power_of_2()
 #include "apf/misc.h"  // for NonCopyable
+#include "apf/container.h"  // for fixed_vector
 
 namespace apf
 {
@@ -48,7 +49,6 @@ class LockFreeFifo<T*> : NonCopyable
 {
   public:
     explicit LockFreeFifo(size_t size);
-    ~LockFreeFifo();
 
     bool push(T* item);
     T* pop();
@@ -59,7 +59,7 @@ class LockFreeFifo<T*> : NonCopyable
     volatile size_t _read_index;  ///< Read pointer
     const size_t _size;           ///< Size of the ringbuffer
     const size_t _size_mask;      ///< Bit mask used in modulo operation
-    T** const _data;              ///< Actual ringbuffer data
+    fixed_vector<T*> _data;       ///< Actual ringbuffer data
 };
 
 /** ctor.
@@ -71,12 +71,8 @@ LockFreeFifo<T*>::LockFreeFifo(size_t size)
   ,  _read_index(0)
   , _size(apf::math::next_power_of_2(size))
   , _size_mask(_size - 1)
-  , _data(new T*[_size])
+  , _data(_size)
 {}
-
-/// dtor.
-template<typename T>
-LockFreeFifo<T*>::~LockFreeFifo() { delete _data; }
 
 /** Add an item to the queue.
  * @param item pointer to an item to be added. 
