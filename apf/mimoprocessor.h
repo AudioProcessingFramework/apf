@@ -66,9 +66,9 @@
  **/
 #define APF_PROCESS(name, parent) \
 struct Process : parent::Process { \
-  explicit Process(name& name ## _arg) : parent::Process(name ## _arg) { \
-    name ## _arg._ ## name ## _process(); } }; \
-void _ ## name ## _process()
+  explicit Process(name& ctor_arg) : parent::Process(ctor_arg) { \
+    ctor_arg.APF_PROCESS_internal(); } }; \
+void APF_PROCESS_internal()
 
 namespace apf
 {
