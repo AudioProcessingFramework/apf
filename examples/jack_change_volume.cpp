@@ -24,6 +24,7 @@
 // Example for crossfade and/or parameter interpolation (?)
 
 #include <iostream>
+#include <cassert>  // for assert()
 
 #include "apf/mimoprocessor.h"
 #include "apf/combine_channels.h"  // for apf::raised_cosine_fade, apf::Combine*
@@ -58,17 +59,17 @@ class MyProcessor::Input : public MimoProcessorBase::DefaultInput
     explicit Input(const Params& p)
       : MimoProcessorBase::DefaultInput(p)
       , weight(this->parent.volume)
-      , old_weight(this->parent.volume)
     {}
 
     APF_PROCESS(Input, MimoProcessorBase::DefaultInput)
     {
       // In real-life applications, this will be more complicated:
-      this->old_weight = this->weight;
       this->weight = this->parent.volume;
+
+      assert(this->weight.exactly_one_assignment());
     }
 
-    float weight, old_weight;
+    apf::BlockParameter<float> weight;
 };
 
 class MyProcessor::CombineFunction
@@ -81,7 +82,7 @@ class MyProcessor::CombineFunction
       using namespace apf::CombineChannelsResult;
 
       _weight = in.weight;
-      _old_weight = in.old_weight;
+      _old_weight = in.weight.old();
 
       if (_weight != _old_weight)
       {

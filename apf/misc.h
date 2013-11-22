@@ -75,12 +75,21 @@ class NonCopyable
 
 /// Hold current and old value of any type.
 /// A new value can be assigned with operator=().
-/// The current and old value can be obtained with get() and get_old(),
+/// The current and old value can be obtained with get() and old(),
 /// respectively.
-/// To find out if the value has changed with the last assignment, use
-/// changed().
-/// @note Using operator=() is the only way to change the value, all other
-///   member functions are constant.
+/// To find out if the old and current value are different, use changed().
+/// BlockParameter is supposed to avoid pairs of variables where one
+/// represents an old value and the other a new one. The @e old value of
+/// BlockParameter is updated in operator=() (and only there).
+/// @attention It's @e not possible to use operator=() without updating the
+///   @e old value. To avoid the unintended use of operator=(), use
+///                                                                        @code
+///   #include <cassert>
+///   BlockParameter<int> bp(42);
+///   bp = 23;
+///   assert(bp.exactly_one_assignment());
+///                                                                     @endcode
+///   This is of course only checked if NDEBUG is undefined.
 /// @tparam T The contained type.
 template<typename T>
 class BlockParameter
@@ -98,21 +107,91 @@ class BlockParameter
     template<typename Arg>
     T& operator=(Arg&& arg)
     {
+#ifndef NDEBUG
+      ++_assignments;
+#endif
+
       _old = std::move(_current);
       return _current = std::forward<Arg>(arg);
     }
 
     const T& get() const { return _current; }  ///< Get current value.
-    const T& get_old() const { return _old; }  ///< Get old value.
+    const T& old() const { return _old; }  ///< Get old value.
 
     /// Conversion operator. For avoiding to call get() all the time.
     operator const T&() const { return this->get(); }
 
-    /// Check if value has changed at last assignment.
-    bool changed() const { return this->get() != this->get_old(); }
+    /// Check if value has changed between before the last assignment and now.
+    bool changed() const { return this->get() != this->old(); }
+
+    /// @name Operators which do not change the old value:
+    /// @{
+    BlockParameter& operator+=(const T& rhs) { _current += rhs; return *this; }
+    BlockParameter& operator-=(const T& rhs) { _current -= rhs; return *this; }
+    BlockParameter& operator*=(const T& rhs) { _current *= rhs; return *this; }
+    BlockParameter& operator/=(const T& rhs) { _current /= rhs; return *this; }
+    BlockParameter& operator%=(const T& rhs) { _current %= rhs; return *this; }
+    BlockParameter& operator&=(const T& rhs) { _current &= rhs; return *this; }
+    BlockParameter& operator|=(const T& rhs) { _current |= rhs; return *this; }
+    BlockParameter& operator<<=(const T& rhs){ _current <<= rhs; return *this; }
+    BlockParameter& operator>>=(const T& rhs){ _current >>= rhs; return *this; }
+
+    BlockParameter& operator++() { ++_current; return *this; }
+    BlockParameter& operator--() { --_current; return *this; }
+    T operator++(int) { return _current++; }
+    T operator--(int) { return _current--; }
+    /// @}
+
+  private:
+    class both_proxy
+    {
+      public:
+        explicit both_proxy(const BlockParameter& param) : _p(param) {}
+
+#define APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(opstring) \
+        friend bool operator opstring(const both_proxy& lhs, const T& rhs) { \
+          return lhs._p.get() opstring rhs && lhs._p.old() opstring rhs; } \
+        friend bool operator opstring(const T& lhs, const both_proxy& rhs) { \
+          return lhs opstring rhs._p.get() && lhs opstring rhs._p.old(); }
+
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(==)
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(!=)
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(<)
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(>)
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(<=)
+        APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS(>=)
+#undef APF_BLOCKPARAMETER_BOTH_PROXY_OPERATORS
+
+      private:
+        const BlockParameter& _p;
+    };
+
+  public:
+
+    both_proxy both() const { return both_proxy(*this); }
+
+#ifndef NDEBUG
+    bool no_multiple_assignments() const
+    {
+      auto result = (_assignments <= 1);
+      _assignments = 0;
+      return result;
+    }
+
+    bool exactly_one_assignment() const
+    {
+      auto result = (_assignments == 1);
+      _assignments = 0;
+      return result;
+    }
+#endif
 
   private:
     T _current, _old;
+
+#ifndef NDEBUG
+    mutable int _assignments = 0;
+#endif
 };
 
 } // namespace apf
