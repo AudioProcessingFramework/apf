@@ -52,12 +52,12 @@ FLEXTPATH ?= /usr/local/src/flext
 .SUFFIXES:
 .SUFFIXES: .cpp .o
 
-no-debug: CPPFLAGS += -DNDEBUG
-no-debug: all
-
 # this adds (very slow) runtime checks for many STL functions:
 debug: CPPFLAGS += -D_GLIBCXX_DEBUG
 debug: all
+
+no-debug: CPPFLAGS += -DNDEBUG
+no-debug: all
 
 all: $(EXECUTABLES)
 
