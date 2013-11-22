@@ -111,8 +111,8 @@ struct Filter : fixed_vector<fft_node>
   Filter(size_t block_size_, In first, In last, size_t partitions_ = 0);
   // Implementation below, after definition of Transform
 
-  size_t block_size() const { return front().size() / 2; }
-  size_t partition_size() const { return front().size(); }
+  size_t block_size() const { return this->front().size() / 2; }
+  size_t partition_size() const { return this->front().size(); }
   size_t partitions() const { return this->size(); }
 };
 
