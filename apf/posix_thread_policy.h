@@ -224,6 +224,8 @@ class posix_thread_policy::Semaphore : NonCopyable
       }
     }
 
+    Semaphore(Semaphore&&) = default;
+
     ~Semaphore()
     {
 #ifdef APF_PSEUDO_UNNAMED_SEMAPHORES
