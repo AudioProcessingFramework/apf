@@ -25,6 +25,7 @@
 // This is a stand-alone program.
 
 #include <iostream>
+#include <cassert>  // for assert()
 
 #include "apf/mimoprocessor.h"
 #include "apf/jack_policy.h"
@@ -213,11 +214,9 @@ class MatrixProcessor::Output : public MimoProcessorBase::DefaultOutput
 
       for (const auto& ch: _channel_list)
       {
-        for (const auto& sample: ch)
-        {
-          *out++ = sample;
-        }
+        out = std::copy(ch.begin(), ch.end(), out);
       }
+      assert(out = this->end());
     }
 
   private:
