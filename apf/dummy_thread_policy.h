@@ -33,8 +33,8 @@
 #define APF_MIMOPROCESSOR_THREAD_POLICY apf::dummy_thread_policy
 #endif
 
-#define APF_DUMMY_THREAD_POLICY_ERROR \
-  std::logic_error("dummy_thread_policy can only be used single-threaded!")
+#define APF_DUMMY_THREAD_POLICY_ERROR throw std::logic_error( \
+    "'dummy_thread_policy' can only be used with a single thread!")
 
 namespace apf
 {
