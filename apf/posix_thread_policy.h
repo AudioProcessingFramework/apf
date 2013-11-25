@@ -101,8 +101,8 @@ class posix_thread_policy::ThreadBase
     native_handle_type native_handle() const { return _thread_id; }
 
   protected:
-    ThreadBase() {}
-    ~ThreadBase() {}
+    ThreadBase() = default;
+    ~ThreadBase() = default;
 
   private:
     native_handle_type _thread_id;
