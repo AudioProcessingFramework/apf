@@ -55,13 +55,13 @@ CPPFLAGS += -I..
 # this adds (very slow) runtime checks for many STL functions:
 CPPFLAGS += -D_GLIBCXX_DEBUG
 
+all:
+	$(MAKE) fftw
+
 run_tests: build_tests
 	./main
 
 build_tests: main
-
-all:
-	$(MAKE) fftw
 
 fftw: LDLIBS += -lfftw3f -lfftw3 -lfftw3l -lm
 fftw: run_tests
