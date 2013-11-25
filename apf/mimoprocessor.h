@@ -317,7 +317,7 @@ class MimoProcessor : public interface_policy
     class WorkerThread : NonCopyable
     {
       private:
-        using Thread = typename thread_policy::template DetachedThread<
+        using DetachedThread = typename thread_policy::template DetachedThread<
           WorkerThreadFunction>;
 
       public:
@@ -328,7 +328,7 @@ class MimoProcessor : public interface_policy
         {
           // Set thread priority from interface_policy, if available
           thread_traits<interface_policy
-            , typename Thread::native_handle_type>::set_priority(parent
+            , typename DetachedThread::native_handle_type>::set_priority(parent
                 , _thread.native_handle());
         }
 
@@ -336,7 +336,7 @@ class MimoProcessor : public interface_policy
         typename thread_policy::Semaphore wait_semaphore;
 
       private:
-        Thread _thread;  // Thread must be initialized after semaphores
+        DetachedThread _thread;  // Thread must be initialized after semaphores
     };
 
     class WorkerThreadFunction
