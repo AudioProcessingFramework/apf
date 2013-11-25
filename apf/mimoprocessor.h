@@ -27,7 +27,6 @@
 #ifndef APF_MIMOPROCESSOR_H
 #define APF_MIMOPROCESSOR_H
 
-#include <vector>
 #include <cassert>  // for assert()
 #include <stdexcept>  // for std::logic_error
 
@@ -35,6 +34,7 @@
 #include "apf/parameter_map.h"
 #include "apf/misc.h"  // for NonCopyable
 #include "apf/iterator.h" // for *_iterator, make_*_iterator(), cast_proxy_const
+#include "apf/container.h" // for fixed_vector
 
 #define APF_MIMOPROCESSOR_TEMPLATES template<typename Derived, typename interface_policy, typename thread_policy, typename query_policy>
 #define APF_MIMOPROCESSOR_BASE MimoProcessor<Derived, interface_policy, thread_policy, query_policy>
@@ -321,14 +321,14 @@ class MimoProcessor : public interface_policy
           WorkerThreadFunction>;
 
       public:
-        WorkerThread(std::pair<int, MimoProcessor*> in)
+        WorkerThread(int thread_number, MimoProcessor& parent)
           : cont_semaphore(0)
           , wait_semaphore(0)
-          , _thread(WorkerThreadFunction(in.first, *in.second, *this))
+          , _thread(WorkerThreadFunction(thread_number, parent, *this))
         {
           // Set thread priority from interface_policy, if available
           thread_traits<interface_policy
-            , typename Thread::native_handle_type>::set_priority(*in.second
+            , typename Thread::native_handle_type>::set_priority(parent
                 , _thread.native_handle());
         }
 
@@ -390,8 +390,7 @@ class MimoProcessor : public interface_policy
     /// Number of threads (main thread plus worker threads)
     const int _num_threads;
 
-    std::function<std::pair<int, MimoProcessor*>(int)> _thread_init_helper;
-    std::vector<WorkerThread> _thread_data;
+    fixed_vector<WorkerThread> _thread_data;
 
     rtlist_t _input_list, _output_list;
 };
@@ -405,13 +404,6 @@ APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
   , _fifo(params.get("fifo_size", 1024))
   , _current_list(nullptr)
   , _num_threads(params.get("threads", APF_MIMOPROCESSOR_DEFAULT_THREADS))
-  // Create worker threads.  NOTE: Number 0 is reserved for the main thread.
-  , _thread_init_helper([this] (int in) { return std::make_pair(in, this); })
-  , _thread_data(
-      make_transform_iterator(make_index_iterator(1)
-        , _thread_init_helper),
-      make_transform_iterator(make_index_iterator(_num_threads)
-        , _thread_init_helper))
   , _input_list(_fifo)
   , _output_list(_fifo)
 {
@@ -419,6 +411,13 @@ APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
 
   // deactivate FIFO for non-realtime initializations
   if (!_fifo.deactivate()) throw std::logic_error("Bug: FIFO not empty!");
+
+  // Create N-1 worker threads.  NOTE: Number 0 is reserved for the main thread.
+  _thread_data.reserve(_num_threads - 1);
+  for (int i = 1; i < _num_threads; ++i)
+  {
+    _thread_data.emplace_back(i, *this);
+  }
 }
 
 APF_MIMOPROCESSOR_TEMPLATES
