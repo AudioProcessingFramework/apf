@@ -151,7 +151,7 @@ template<typename F>
 class posix_thread_policy::DetachedThread : public ThreadBase
 {
   public:
-    DetachedThread(F f)
+    explicit DetachedThread(F f)
       : _function(f)
     {
       this->create(&_thread_aux, this);

@@ -96,7 +96,7 @@ struct dummy_thread_policy::ScopedThread : Thread
 template<typename F>
 struct dummy_thread_policy::DetachedThread : Thread
 {
-  DetachedThread(F)
+  explicit DetachedThread(F)
   {
     APF_DUMMY_THREAD_POLICY_ERROR;
   }
