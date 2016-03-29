@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     throw std::runtime_error("Only mono files are supported!");
   }
 
-  std::vector<float> ir(in.frames());
+  std::vector<float> ir(size_t(in.frames()));
 
   if (in.readf(&ir[0], in.frames()) != in.frames())
   {

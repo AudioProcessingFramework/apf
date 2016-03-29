@@ -63,9 +63,9 @@ struct Name : Prevention<T> { \
   COUNT_DENORMALS_IN_CASCADE(coeffs_dbl, cascade_dbl, name, prevention) \
   std::cout << std::endl; }
 
-int block_size = 1024;
+size_t block_size = 1024;
 int number_of_blocks_count = 200;
-int number_of_sections_count = 10;
+size_t number_of_sections_count = 10;
 
 // denormal counter map
 std::map<std::string, std::pair<int, int>> denormal_counter;

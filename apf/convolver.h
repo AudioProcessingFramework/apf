@@ -59,6 +59,8 @@ namespace conv
 /// Calculate necessary number of partitions for a given filter length
 static size_t min_partitions(size_t block_size, size_t filter_size)
 {
+  assert(block_size > 0);
+  assert(filter_size > 0);
   return (filter_size + block_size - 1) / block_size;
 }
 
@@ -211,10 +213,12 @@ template<typename In>
 In
 TransformBase::prepare_partition(In first, In last, fft_node& partition) const
 {
-  assert(size_t(std::distance(partition.begin(), partition.end()))
-      == _partition_size);
+  assert(std::distance(partition.begin(), partition.end())
+      == static_cast<fft_node::difference_type>(_partition_size));
 
-  auto chunk = std::min(_block_size, size_t(std::distance(first, last)));
+  using difference_type = typename std::iterator_traits<In>::difference_type;
+  auto chunk = std::min(
+      static_cast<difference_type>(_block_size), std::distance(first, last));
 
   // This also works for the case chunk==0:
   if (math::has_only_zeros(first, first + chunk))
@@ -284,9 +288,10 @@ struct Transform : TransformBase
 template<typename In>
 Filter::Filter(size_t block_size_, In first, In last, size_t partitions_)
   : fixed_vector<fft_node>(partitions_ ? partitions_
-      : min_partitions(block_size_, std::distance(first, last))
+      : min_partitions(block_size_, size_t(std::distance(first, last)))
       , block_size_ * 2)
 {
+  assert(std::distance(first, last) > 0);
   assert(this->partitions() > 0);
 
   Transform(block_size_).prepare_filter(first, last, *this);
@@ -336,6 +341,8 @@ Input::add_block(In first)
   auto& current = this->spectra.front();
   auto& next = this->spectra.back();
 
+  auto block_size = static_cast<fft_node::difference_type>(this->block_size());
+
   if (math::has_only_zeros(first, last))
   {
     next.zero = true;
@@ -347,7 +354,7 @@ Input::add_block(In first)
     else
     {
       // If first half is not zero, second half must be filled with zeros
-      std::fill(current.begin() + this->block_size(), current.end(), 0.0f);
+      std::fill(current.begin() + block_size, current.end(), 0.0f);
     }
   }
   else
@@ -355,11 +362,11 @@ Input::add_block(In first)
     if (current.zero)
     {
       // First half must be actually filled with zeros
-      std::fill(current.begin(), current.begin() + this->block_size(), 0.0f);
+      std::fill(current.begin(), current.begin() + block_size, 0.0f);
     }
 
     // Copy data to second half of the current partition
-    std::copy(first, last, current.begin() + this->block_size());
+    std::copy(first, last, current.begin() + block_size);
     current.zero = false;
     // Copy data to first half of the upcoming partition
     std::copy(first, last, next.begin());
@@ -439,13 +446,13 @@ OutputBase::convolve(float weight)
 {
   _multiply_spectra();
 
+  auto block_size = static_cast<fft_node::difference_type>(_input.block_size());
+
   // The first half will be discarded
   auto second_half = make_begin_and_end(
-      _output_buffer.begin() + _input.block_size(), _output_buffer.end());
+      _output_buffer.begin() + block_size, _output_buffer.end());
 
-  assert(static_cast<size_t>(
-        std::distance(second_half.begin(), second_half.end()))
-      == _input.block_size());
+  assert(std::distance(second_half.begin(), second_half.end()) == block_size);
 
   if (_output_buffer.zero)
   {
@@ -764,9 +771,11 @@ struct StaticConvolver : Input, StaticOutput
   template<typename In>
   StaticConvolver(size_t block_size_, In first, In last, size_t partitions_ = 0)
     : Input(block_size_, partitions_ ? partitions_
-        : min_partitions(block_size_, std::distance(first, last)))
+        : min_partitions(block_size_, size_t(std::distance(first, last))))
     , StaticOutput(*this, first, last)
-  {}
+  {
+    assert(std::distance(first, last) > 0);
+  }
 
   StaticConvolver(const Filter& filter, size_t partitions_ = 0)
     : Input(filter.block_size()

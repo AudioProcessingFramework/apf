@@ -114,7 +114,7 @@ class portaudio_policy
       return true;
     }
 
-    int block_size() const { return _block_size; }
+    unsigned long block_size() const { return _block_size; }
     int sample_rate() const { return _sample_rate; }
 
     int in_channels() const { return _next_input_id; }
@@ -128,7 +128,7 @@ class portaudio_policy
     /// Constructor
     explicit portaudio_policy(const parameter_map& p = parameter_map())
       : _sample_rate(p.get<int>("sample_rate"))
-      , _block_size(p.get<int>("block_size"))
+      , _block_size(p.get<unsigned long>("block_size"))
       , _device_id(p.get("device_id", 0))
       , _next_input_id(0)
       , _next_output_id(0)
@@ -159,7 +159,7 @@ class portaudio_policy
     int pa_callback(const void *input, void *output, unsigned long frameCount)
     {
       (void)frameCount;
-      assert(static_cast<int>(frameCount) == this->block_size());
+      assert(frameCount == this->block_size());
 
       _in = static_cast<sample_type* const*>(input);
       _out = static_cast<sample_type* const*>(output);
@@ -180,7 +180,7 @@ class portaudio_policy
     int get_next_output_id() { return _next_output_id++; }
 
     const int _sample_rate;
-    const int _block_size;
+    const unsigned long _block_size;
     const int _device_id;
 
     int _next_input_id;

@@ -317,7 +317,7 @@ class MimoProcessor : public interface_policy
           WorkerThreadFunction>;
 
       public:
-        WorkerThread(int thread_number, MimoProcessor& parent)
+        WorkerThread(unsigned thread_number, MimoProcessor& parent)
           : cont_semaphore(0)
           , wait_semaphore(0)
           , _thread(WorkerThreadFunction(thread_number, parent, *this))
@@ -338,7 +338,7 @@ class MimoProcessor : public interface_policy
     class WorkerThreadFunction
     {
       public:
-        WorkerThreadFunction(int thread_number, MimoProcessor& parent
+        WorkerThreadFunction(unsigned thread_number, MimoProcessor& parent
             , WorkerThread& thread)
           : _thread_number(thread_number)
           , _parent(parent)
@@ -357,7 +357,7 @@ class MimoProcessor : public interface_policy
         }
 
       private:
-        int _thread_number;
+        unsigned _thread_number;
         MimoProcessor& _parent;
         WorkerThread& _thread;
     };
@@ -375,7 +375,7 @@ class MimoProcessor : public interface_policy
     }
 
     void _process_current_list_in_main_thread();
-    void _process_selected_items_in_current_list(int thread_number);
+    void _process_selected_items_in_current_list(unsigned thread_number);
 
     Input* _add_helper(Input* in) { return _input_list.add(in); }
     Output* _add_helper(Output* out) { return _output_list.add(out); }
@@ -384,7 +384,7 @@ class MimoProcessor : public interface_policy
     rtlist_t* _current_list;
 
     /// Number of threads (main thread plus worker threads)
-    const int _num_threads;
+    const unsigned _num_threads;
 
     fixed_vector<WorkerThread> _thread_data;
 
@@ -395,9 +395,9 @@ class MimoProcessor : public interface_policy
 APF_MIMOPROCESSOR_TEMPLATES
 APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
   : interface_policy(params_)
-  , query_policy(params_.get("fifo_size", 1024))
+  , query_policy(params_.get("fifo_size", size_t(1024)))
   , params(params_)
-  , _fifo(params.get("fifo_size", 1024))
+  , _fifo(params.get("fifo_size", size_t(1024)))
   , _current_list(nullptr)
   , _num_threads(params.get("threads"
         , thread_policy::default_number_of_threads()))
@@ -411,7 +411,7 @@ APF_MIMOPROCESSOR_BASE::MimoProcessor(const parameter_map& params_)
 
   // Create N-1 worker threads.  NOTE: Number 0 is reserved for the main thread.
   _thread_data.reserve(_num_threads - 1);
-  for (int i = 1; i < _num_threads; ++i)
+  for (unsigned i = 1; i < _num_threads; ++i)
   {
     _thread_data.emplace_back(i, *this);
   }
@@ -448,11 +448,12 @@ APF_MIMOPROCESSOR_BASE::_process_list(rtlist_t& l1, rtlist_t& l2)
 
 APF_MIMOPROCESSOR_TEMPLATES
 void
-APF_MIMOPROCESSOR_BASE::_process_selected_items_in_current_list(int thread_number)
+APF_MIMOPROCESSOR_BASE::_process_selected_items_in_current_list(
+    unsigned thread_number)
 {
   assert(_current_list);
 
-  int n = 0;
+  unsigned n = 0;
   for (auto& i: *_current_list)
   {
     if (thread_number == n++ % _num_threads)

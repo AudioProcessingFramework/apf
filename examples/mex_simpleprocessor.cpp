@@ -54,7 +54,7 @@ using sample_type = SimpleProcessor::sample_type;
 
 // global variables holding the state
 std::unique_ptr<SimpleProcessor> engine;
-mwSize in_channels, out_channels, threads=1, block_size=64, sample_rate=44100;
+size_t in_channels, out_channels, threads=1, block_size=64, sample_rate=44100;
 std::vector<sample_type*> inputs, outputs;
 
 void engine_init(int nrhs, const mxArray* prhs[])
@@ -65,27 +65,27 @@ void engine_init(int nrhs, const mxArray* prhs[])
   }
   if (nrhs > 0)
   {
-    in_channels = static_cast<mwSize>(*mxGetPr(prhs[0]));
+    in_channels = static_cast<size_t>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    out_channels = static_cast<mwSize>(*mxGetPr(prhs[0]));
+    out_channels = static_cast<size_t>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    threads = static_cast<mwSize>(*mxGetPr(prhs[0]));
+    threads = static_cast<size_t>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    block_size = static_cast<mwSize>(*mxGetPr(prhs[0]));
+    block_size = static_cast<size_t>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
   {
-    sample_rate = static_cast<mwSize>(*mxGetPr(prhs[0]));
+    sample_rate = static_cast<size_t>(*mxGetPr(prhs[0]));
     --nrhs; ++prhs;
   }
   if (nrhs > 0)
@@ -128,11 +128,11 @@ void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
   {
     mexErrMsgTxt("Exactly one input and one output is needed!");
   }
-  if (static_cast<mwSize>(mxGetM(prhs[0])) != block_size)
+  if (static_cast<size_t>(mxGetM(prhs[0])) != block_size)
   {
     mexErrMsgTxt("Number of rows must be the same as block size!");
   }
-  if (static_cast<mwSize>(mxGetN(prhs[0])) != in_channels)
+  if (static_cast<size_t>(mxGetN(prhs[0])) != in_channels)
   {
     mexErrMsgTxt("Number of columns must be the same as number of inputs!");
   }
@@ -158,19 +158,19 @@ void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
   {
     mexErrMsgTxt("This function only works with single precision data!");
   }
-  plhs[0] = mxCreateNumericMatrix(block_size, out_channels
-      , mxSINGLE_CLASS, mxREAL);
+  plhs[0] = mxCreateNumericMatrix(static_cast<mwSize>(block_size)
+      , static_cast<mwSize>(out_channels), mxSINGLE_CLASS, mxREAL);
   sample_type* output = static_cast<sample_type*>(mxGetData(plhs[0]));
   sample_type*  input = static_cast<sample_type*>(mxGetData(prhs[0]));
 #endif
 
-  for (int i = 0; i <= in_channels; ++i)
+  for (size_t i = 0; i <= in_channels; ++i)
   {
     inputs[i] = input;
     input += block_size;
   }
 
-  for (int i = 0; i <= out_channels; ++i)
+  for (size_t i = 0; i <= out_channels; ++i)
   {
     outputs[i] = output;
     output += block_size;

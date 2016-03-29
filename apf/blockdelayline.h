@@ -45,6 +45,7 @@ class BlockDelayLine
 {
   public:
     using size_type = typename Container::size_type;
+    using difference_type = typename Container::difference_type;
     using pointer = typename Container::pointer;
     using circulator = apf::circular_iterator<typename Container::iterator>;
 
@@ -73,7 +74,7 @@ class BlockDelayLine
     void advance()
     {
       ++_block_circulator;
-      _data_circulator += _block_size;
+      _data_circulator += static_cast<difference_type>(_block_size);
     }
 
     template<typename Iterator>
@@ -126,7 +127,8 @@ BlockDelayLine<T, Container>::BlockDelayLine(size_type block_size
       std::max(size_type(2), (_max_delay + 2 * _block_size - 1) / _block_size))
   , _data(_number_of_blocks * _block_size)  // initialized with default ctor T()
   , _data_circulator(_data.begin(), _data.end())
-  , _block_circulator(_data_circulator, _block_size)
+  , _block_circulator(
+      _data_circulator, static_cast<difference_type>(_block_size))
 {
   assert(_block_size >= 1);
 }
@@ -166,7 +168,8 @@ BlockDelayLine<T, Container>::read_block(Iterator destination, size_type delay)
   // access iterator (e.g. when using a std::list)
   if (!this->delay_is_valid(delay)) return false;
   circulator source = this->get_read_circulator(delay);
-  std::copy(source, source + _block_size, destination);
+  std::copy(source, source + static_cast<difference_type>(_block_size)
+      , destination);
   return true;
 }
 
@@ -179,8 +182,8 @@ BlockDelayLine<T, Container>::read_block(Iterator destination
 {
   if (!this->delay_is_valid(delay)) return false;
   circulator source = this->get_read_circulator(delay);
-  std::transform(source, source + _block_size, destination
-      , [weight] (T in) { return in * weight; });
+  std::transform(source, source + static_cast<difference_type>(_block_size)
+      , destination, [weight] (T in) { return in * weight; });
   return true;
 }
 
@@ -206,7 +209,7 @@ template<typename T, typename Container>
 typename BlockDelayLine<T, Container>::circulator
 BlockDelayLine<T, Container>::get_read_circulator(size_type delay) const
 {
-  return _get_data_circulator() - delay;
+  return _get_data_circulator() - static_cast<difference_type>(delay);
 }
 
 /** A block-based delay line where negative delay is possible.
@@ -233,7 +236,7 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
     NonCausalBlockDelayLine(size_type block_size, size_type max_delay
         , size_type initial_delay)
       : _base(block_size, max_delay + initial_delay)
-      , _initial_delay(initial_delay)
+      , _initial_delay(static_cast<difference_type>(initial_delay))
     {}
 
 #ifdef APF_DOXYGEN_HACK
@@ -265,8 +268,9 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
         return false;
       }
       size_type tmp;
-      bool valid = _base::delay_is_valid(delay + _initial_delay, tmp);
-      corrected = tmp - _initial_delay;
+      bool valid = _base::delay_is_valid(
+          static_cast<size_type>(delay + _initial_delay), tmp);
+      corrected = static_cast<difference_type>(tmp) - _initial_delay;
       return valid;
     }
 
@@ -282,7 +286,8 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
     bool read_block(Iterator destination, difference_type delay) const
     {
       if (delay < -_initial_delay) return false;
-      return _base::read_block(destination, delay + _initial_delay);
+      return _base::read_block(destination
+          , static_cast<size_type>(delay + _initial_delay));
     }
 
     /// @see BlockDelayLine::read_block()
@@ -290,7 +295,8 @@ class NonCausalBlockDelayLine : private BlockDelayLine<T, Container>
     bool read_block(Iterator destination, difference_type delay, T weight) const
     {
       if (delay < -_initial_delay) return false;
-      return _base::read_block(destination, delay + _initial_delay, weight);
+      return _base::read_block(destination
+          , static_cast<size_type>(delay + _initial_delay), weight);
     }
 
     /// @see BlockDelayLine::get_read_circulator()

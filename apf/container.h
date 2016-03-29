@@ -122,7 +122,7 @@ class fixed_vector : private std::vector<T, Allocator>
     template<typename Size, typename Arg
       , typename = internal::if_integral<Size>>
     fixed_vector(Size n, Arg&& arg, const Allocator& a)
-      : _base(n, std::forward<Arg>(arg), a)
+      : _base(static_cast<size_type>(n), std::forward<Arg>(arg), a)
     {}
 
     /// Constructor from size and initialization arguments.
@@ -454,7 +454,7 @@ class fixed_matrix<T, Allocator>::channels_iterator
 
     /// Constructor.
     channels_iterator(channel_iterator base_iterator, size_type step)
-      : _base_iterator(base_iterator, step)
+      : _base_iterator(base_iterator, static_cast<difference_type>(step))
       , _size(step)
     {}
 
@@ -537,8 +537,9 @@ class fixed_matrix<T, Allocator>::slices_iterator
     reference operator*() const
     {
       assert(apf::no_nullptr(_base_iterator));
-      slice_iterator temp(_base_iterator, _max_slices);
-      return Slice(temp, temp + _max_channels);
+      slice_iterator temp{_base_iterator
+        , static_cast<difference_type>(_max_slices)};
+      return Slice(temp, temp + static_cast<difference_type>(_max_channels));
     }
 
     /// Arrow operator.

@@ -33,12 +33,12 @@ TEST_CASE("parameter_map", "")
 SECTION("constructors", "")
 {
   apf::parameter_map pm1;  // default
-  apf::parameter_map pm2(pm1);  // copy
-  apf::parameter_map pm3(apf::parameter_map());  // move
+  apf::parameter_map pm2{pm1};  // copy
+  apf::parameter_map pm3{apf::parameter_map{}};  // move
 
   std::map<std::string, std::string> m1;
-  apf::parameter_map pm4(m1);  // copy
-  apf::parameter_map pm5(std::map<std::string, std::string>());  // move
+  apf::parameter_map pm4{m1};  // copy
+  apf::parameter_map pm5{std::map<std::string, std::string>{}};  // move
 }
 
 SECTION("stuff", "")

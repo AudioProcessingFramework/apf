@@ -84,20 +84,22 @@ int mimoprocessor_file_io(Processor& processor
   std::cout << "channels: " << in.channels() << std::endl;
   std::cout << "samplerate: " << in.samplerate() << std::endl;
 
-  int blocksize = processor.block_size();
+  auto blocksize = processor.block_size();
 
   // these matrices are used for de-interleaving and interleaving
-  fixed_matrix<float> m_in(blocksize, in.channels());
-  fixed_matrix<float> m_in_transpose(in.channels(), blocksize);
-  fixed_matrix<float> m_out(blocksize, processor.out_channels());
-  fixed_matrix<float> m_out_transpose(processor.out_channels(), blocksize);
+  fixed_matrix<float> m_in(blocksize, size_t(in.channels()));
+  fixed_matrix<float> m_in_transpose(size_t(in.channels()), blocksize);
+  fixed_matrix<float> m_out(blocksize, size_t(processor.out_channels()));
+  fixed_matrix<float> m_out_transpose(
+      size_t(processor.out_channels()), blocksize);
 
   processor.activate();
 
   StopWatch watch("processing");
 
-  size_t actual_frames = 0;
-  while ((actual_frames = in.readf(m_in.data(), blocksize)) != 0)
+  sf_count_t actual_frames = 0;
+  while ((actual_frames = in.readf(m_in.data()
+          , static_cast<sf_count_t>(blocksize))) != 0)
   {
     m_in_transpose.set_channels(m_in.slices);
 

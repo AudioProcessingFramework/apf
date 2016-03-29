@@ -55,22 +55,22 @@ class pointer_policy<T*>
     class Input;
     class Output;
 
-    void audio_callback(int n, T* const* in, T* const* out);
+    void audio_callback(size_t n, T* const* in, T* const* out);
 
     // for now, do nothing:
     bool activate() const { return true; }
     bool deactivate() const { return true; }
 
-    int block_size() const { return _block_size; }
-    int sample_rate() const { return _sample_rate; }
+    size_t block_size() const { return _block_size; }
+    size_t sample_rate() const { return _sample_rate; }
 
     int in_channels() const { return _next_input_id; }
     int out_channels() const { return _next_output_id; }
 
   protected:
     explicit pointer_policy(const parameter_map& params = parameter_map())
-      : _sample_rate(params.get<int>("sample_rate"))
-      , _block_size(params.get<int>("block_size"))
+      : _sample_rate(params.get<size_t>("sample_rate"))
+      , _block_size(params.get<size_t>("block_size"))
       , _next_input_id(0)
       , _next_output_id(0)
       , _in(0)
@@ -89,8 +89,8 @@ class pointer_policy<T*>
     /// @see get_next_input_id()
     int get_next_output_id() { return _next_output_id++; }
 
-    const int _sample_rate;
-    const int _block_size;
+    const size_t _sample_rate;
+    const size_t _block_size;
 
     int _next_input_id;
     int _next_output_id;
@@ -111,7 +111,7 @@ class pointer_policy<T*>
  **/
 template<typename T>
 void
-pointer_policy<T*>::audio_callback(int n, T* const* in, T* const* out)
+pointer_policy<T*>::audio_callback(size_t n, T* const* in, T* const* out)
 {
   assert(n == this->block_size());
   (void)n;  // avoid "unused parameter" warning

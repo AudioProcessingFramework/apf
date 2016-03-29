@@ -106,9 +106,9 @@ int main()
 {
   // TODO: check for input arguments
 
-  int in_channels = 10;
-  int out_channels = 70;
-  int block_size = 512;
+  size_t in_channels = 10;
+  size_t out_channels = 70;
+  size_t block_size = 512;
   int repetitions = 1000;
   int threads = 1;
 
