@@ -341,7 +341,7 @@ Input::add_block(In first)
   auto& current = this->spectra.front();
   auto& next = this->spectra.back();
 
-  auto block_size = static_cast<fft_node::difference_type>(this->block_size());
+  auto offset = static_cast<fft_node::difference_type>(this->block_size());
 
   if (math::has_only_zeros(first, last))
   {
@@ -354,7 +354,7 @@ Input::add_block(In first)
     else
     {
       // If first half is not zero, second half must be filled with zeros
-      std::fill(current.begin() + block_size, current.end(), 0.0f);
+      std::fill(current.begin() + offset, current.end(), 0.0f);
     }
   }
   else
@@ -362,11 +362,11 @@ Input::add_block(In first)
     if (current.zero)
     {
       // First half must be actually filled with zeros
-      std::fill(current.begin(), current.begin() + block_size, 0.0f);
+      std::fill(current.begin(), current.begin() + offset, 0.0f);
     }
 
     // Copy data to second half of the current partition
-    std::copy(first, last, current.begin() + block_size);
+    std::copy(first, last, current.begin() + offset);
     current.zero = false;
     // Copy data to first half of the upcoming partition
     std::copy(first, last, next.begin());
@@ -446,13 +446,13 @@ OutputBase::convolve(float weight)
 {
   _multiply_spectra();
 
-  auto block_size = static_cast<fft_node::difference_type>(_input.block_size());
+  auto offset = static_cast<fft_node::difference_type>(_input.block_size());
 
   // The first half will be discarded
   auto second_half = make_begin_and_end(
-      _output_buffer.begin() + block_size, _output_buffer.end());
+      _output_buffer.begin() + offset, _output_buffer.end());
 
-  assert(std::distance(second_half.begin(), second_half.end()) == block_size);
+  assert(std::distance(second_half.begin(), second_half.end()) == offset);
 
   if (_output_buffer.zero)
   {

@@ -1,7 +1,7 @@
 # Configuration for https://travis-ci.org/
 
 sudo: required
-# Ubuntu 14.04 Trusty support:
+# Ubuntu 14.04 Trusty support (for C++11-enabled compilers):
 dist: trusty
 language: cpp
 compiler:
