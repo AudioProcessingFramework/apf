@@ -150,7 +150,8 @@ void engine_process(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
   {
     mexErrMsgTxt("This function only works with double precision data!");
   }
-  plhs[0] = mxCreateDoubleMatrix(block_size, out_channels, mxREAL);
+  plhs[0] = mxCreateDoubleMatrix(static_cast<mwSize>(block_size)
+      , static_cast<mwSize>(out_channels), mxREAL);
   sample_type* output = mxGetPr(plhs[0]);
   sample_type*  input = mxGetPr(prhs[0]);
 #else
