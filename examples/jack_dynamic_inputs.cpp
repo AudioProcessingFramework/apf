@@ -68,7 +68,7 @@ int main()
   {
     MyProcessor::Input::Params p;
     p.set("id", i * 10);
-    p.set("connect_to", "system:capture_1");
+    p.set("connect-to", "system:capture_1");
     inputs.push_back(engine.add(p));
     sleep(1);
   }

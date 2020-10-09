@@ -59,7 +59,7 @@ int main()
   {
     MyProcessor::Output::Params p;
     p.set("id", i * 10);
-    p.set("connect_to", "system:playback_1");
+    p.set("connect-to", "system:playback_1");
     outputs.push_back(engine.add(p));
     sleep(1);
   }

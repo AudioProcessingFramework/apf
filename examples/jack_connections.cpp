@@ -14,7 +14,7 @@ class MyProcessor : public apf::MimoProcessor<MyProcessor, apf::jack_policy>
       this->add(in_params);
 
       in_params.set("port_name", "initial_connection");
-      in_params.set("connect_to", "system:capture_1");
+      in_params.set("connect-to", "system:capture_1");
       this->add(in_params);
 
       Output::Params out_params;
