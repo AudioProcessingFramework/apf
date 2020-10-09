@@ -1,5 +1,17 @@
 User-visible changes in the Audio Processing Framework. Recent changes on top.
 
+0.4.0 (09 October 2020)
+
+ - remove all thread policies, replace them with native C++11 threads
+
+ - SharedData: support movable types, set_from_rt_thread() 
+
+ - JACK client: add sync callback
+
+ - jack_policy: rename connect_to -> connect-to
+
+ - MEX: Add missing convert() function for long int
+
 0.3.0 (11 May 2016)
 
  - the license was changed from the GPL to the less restrictive MIT license
