@@ -21,7 +21,6 @@
 #endif
 
 #include "apf/pointer_policy.h"
-#include "apf/cxx_thread_policy.h"
 
 #include "simpleprocessor.h"
 
