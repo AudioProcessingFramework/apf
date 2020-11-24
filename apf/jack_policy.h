@@ -98,11 +98,19 @@ class jack_policy : public JackClient
     {
       (void)nframes;
       assert(nframes == this->block_size());
-
-      // call virtual member function which is implemented in derived class
-      // (template method design pattern)
-      this->process();
-
+      try
+      {
+        // call virtual member function which is implemented in derived class
+        // (template method design pattern)
+        this->process();
+      }
+      catch (std::exception& e)
+      {
+#ifdef APF_JACK_POLICY_DEBUG
+        printf("Error in process callback: %s\n", e.what());
+#endif
+        return 1;  // Stop calling the callback
+      }
       return 0;
     }
 
