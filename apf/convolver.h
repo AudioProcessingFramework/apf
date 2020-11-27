@@ -336,7 +336,7 @@ void
 Input::add_block(In first)
 {
   In last = first;
-  std::advance(last, this->block_size());
+  std::advance(last, static_cast<std::ptrdiff_t>(this->block_size()));
 
   // rotate buffers (this->spectra.size() is always at least 2)
   this->spectra.move(--this->spectra.end(), this->spectra.begin());

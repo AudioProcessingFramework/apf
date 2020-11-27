@@ -350,7 +350,7 @@ class has_begin_and_end
       : _begin(b)
       , _end(b)
     {
-      std::advance(_end, length);
+      std::advance(_end, static_cast<std::make_signed_t<Distance>>(length));
     }
 
     // auto-generated copy constructor is used

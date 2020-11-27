@@ -398,9 +398,9 @@ class fixed_matrix : public fixed_vector<T, Allocator>
           slices_iterator(_base::data(), max_channels, max_slices), max_slices);
 
       _channel_ptrs.reserve(max_channels);
-      for (const auto& channel: this->channels)
+      for (const auto channel: this->channels)
       {
-        _channel_ptrs.emplace_back(&*channel.begin());
+        _channel_ptrs.emplace_back(channel.begin());
       }
       assert(_channel_ptrs.size() == max_channels);
     }
@@ -597,7 +597,7 @@ fixed_matrix<T, Allocator>::set_channels(const Ch& ch)
 
   auto target = this->channels.begin();
 
-  for (const auto& i: ch)
+  for (const auto i: ch)
   {
     std::copy(i.begin(), i.end(), target->begin());
     ++target;

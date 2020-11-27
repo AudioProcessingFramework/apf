@@ -41,6 +41,10 @@ CXXFLAGS += -Wconversion
 #CXXFLAGS += -Winline
 #CXXFLAGS += -Weffc++
 
+# Homebrew still uses JACK1 (0.125.0), which uses "register" as a variable name,
+# see https://github.com/jackaudio/jack1/issues/84
+CXXFLAGS += -Wno-deprecated-register
+
 CPPFLAGS += -I..
 
 #### no more setting below here ####

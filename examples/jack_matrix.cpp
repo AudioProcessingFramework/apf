@@ -231,7 +231,7 @@ MatrixProcessor::MatrixProcessor(const apf::parameter_map& p)
   // m1: input channels are split up in more (and smaller) channels
 
   m1_channel::Setup m1_setup(_parts, _part_length, this->get_input_list());
-  for (const auto& ch: _m1.channels)
+  for (const auto ch: _m1.channels)
   {
     _m1_list.add(m1_setup(ch));
   }
