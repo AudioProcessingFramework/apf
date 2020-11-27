@@ -1,0 +1,48 @@
+name: Run Tests, Compile Examples
+on: [push, pull_request]
+jobs:
+  examples:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: install Ubuntu packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          PACKAGES=(
+            libfftw3-dev
+            libjack-jackd2-dev
+            liboctave-dev
+            libsndfile1-dev
+            portaudio19-dev
+          )
+          sudo apt-get install --no-install-recommends ${PACKAGES[@]}
+      - name: install macOS packages
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          PACKAGES=(
+            fftw
+            jack
+            libsndfile
+            octave
+            portaudio
+          )
+          brew install ${PACKAGES[@]}
+      - name: checkout APF source code
+        uses: actions/checkout@v2
+      - name: run unit tests
+        run: |
+          make -C unit_tests
+      - name: run performance tests
+        run: |
+          make -C performance_tests
+      - name: compile examples
+        run: |
+          make -C examples
+      - name: compile MEX files
+        run: |
+          make -C examples mex
+      - name: compile MEX files (double precision)
+        run: |
+          make -C examples mex-double
