@@ -17,6 +17,7 @@ jobs:
             libsndfile1-dev
             portaudio19-dev
           )
+          sudo apt-get update
           sudo apt-get install --no-install-recommends ${PACKAGES[@]}
       - name: install macOS packages
         if: startsWith(matrix.os, 'macos')

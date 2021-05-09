@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: install Ubuntu packages
         run: |
+          sudo apt-get update
           sudo apt-get install --no-install-recommends puredata-dev
       - name: checkout flext
         uses: actions/checkout@v2
