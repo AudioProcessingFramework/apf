@@ -311,7 +311,7 @@ class JackClient
       return _client ? jack_cpu_load(_client) : 100.0f;
     }
 
-    pthread_t client_thread_id() const
+    jack_native_thread_t client_thread_id() const
     {
       return _client ? jack_client_thread_id(_client) : 0;
     }
