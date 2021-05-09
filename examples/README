@@ -1,10 +1,10 @@
 Some examples of how the Audio Processing Framework (APF) can be used.
 
+See the pure-data subdirectory for a Pure Data external.
+
 Compilation:
 
 make
-
-make pd
 
 make mex
 

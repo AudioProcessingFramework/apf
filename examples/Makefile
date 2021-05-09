@@ -49,8 +49,6 @@ CPPFLAGS += -I..
 
 #### no more setting below here ####
 
-FLEXTPATH ?= /usr/local/src/flext
-
 # without this, intermediate .o files are generated:
 .SUFFIXES:
 .SUFFIXES: .cpp .o
@@ -75,20 +73,6 @@ $(PORTAUDIO_STUFF): LDLIBS += -lportaudio
 
 $(FFTW_STUFF): LDLIBS += -lfftw3f
 
-# For Puredata stuff see also package.txt
-
-pd: check_flext_path package.txt
-	$(FLEXTPATH)/build.sh pd gcc
-
-.PHONY: pd
-
-check_flext_path:
-	@test -n '$(FLEXTPATH)' || ( echo \"FLEXTPATH\" is empty! ; false )
-	@test -d '$(FLEXTPATH)' || \
-		( echo \"$(FLEXTPATH)\" not found! Set FLEXTPATH! ; false )
-
-.PHONY: check_flext_path
-
 mex: CPPFLAGS += -DNDEBUG
 # Compile unconditionally to allow switching between float and double:
 mex: clean-mex
@@ -105,8 +89,6 @@ mex-double: mex
 
 clean: clean-mex
 	$(RM) $(EXECUTABLES) $(OBJECTS)
-	test -d $(FLEXTPATH) && $(FLEXTPATH)/build.sh pd gcc clean || true
-	@rmdir pd-linux 2> /dev/null || true
 
 clean-mex:
 	$(RM) $(MEX_FILES)
@@ -114,7 +96,7 @@ clean-mex:
 .PHONY: clean clean-mex
 
 # rebuild everything when Makefile changes
-$(OBJECTS) $(EXECUTABLES) $(PD_EXTERNALS) $(MEX_FILES): Makefile
+$(OBJECTS) $(EXECUTABLES) $(MEX_FILES): Makefile
 
 DEPENDENCIES = $(EXECUTABLES) $(OBJECTS)
 

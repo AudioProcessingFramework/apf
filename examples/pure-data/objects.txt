@@ -1,0 +1,1 @@
+simpleprocessor~	An example external using the Audio Processing Framework (APF)

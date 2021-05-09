@@ -1,0 +1,5 @@
+Pure Data external using the Audio Processing Framework (APF)
+
+Compilation:
+
+make
