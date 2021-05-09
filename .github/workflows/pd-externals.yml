@@ -1,0 +1,115 @@
+name: Build Pd Externals
+on: [push, pull_request]
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install Ubuntu packages
+        run: |
+          sudo apt-get install --no-install-recommends puredata-dev
+      - name: checkout APF
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          path: apf
+      - name: build externals
+        working-directory: apf/examples/pure-data
+        run: |
+          make install DESTDIR=build PDLIBDIR=
+      - name: upload Linux externals
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-externals
+          path: apf/examples/pure-data/build/*
+
+  macos:
+    runs-on: macos-latest
+    env:
+      cflags: -mmacosx-version-min=10.9
+    steps:
+      - name: install macOS packages
+        run: |
+          brew install --cask pd
+      - name: checkout APF
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          path: apf
+      - name: build externals
+        working-directory: apf/examples/pure-data
+        run: |
+          make install DESTDIR=build PDLIBDIR=
+      - name: upload macOS externals
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-externals
+          path: apf/examples/pure-data/build/*
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          release: false
+      - name: Install Pd
+        run: |
+          wget -q -O Pd.zip http://msp.ucsd.edu/Software/pd-0.51-3.msw.zip
+          rm -rf "${PROGRAMFILES}/pd" && mkdir -p "${PROGRAMFILES}/pd"
+          unzip -q Pd.zip -d "${PROGRAMFILES}/pd"
+          mv -v "${PROGRAMFILES}/pd"/*/* "${PROGRAMFILES}/pd"
+          rm -f Pd.zip
+          export PD="${PROGRAMFILES}/pd/bin/pd.com"
+      - name: checkout APF
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          path: apf
+      - name: build externals
+        working-directory: apf/examples/pure-data
+        run: |
+          make install DESTDIR=build PDLIBDIR=
+      - name: upload Windows externals
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-externals
+          path: apf/examples/pure-data/build/*
+
+  deken-package:
+    runs-on: ubuntu-latest
+    needs: [linux, macos, windows]
+    steps:
+      - name: Clone Git repository
+        uses: actions/checkout@v2
+      - name: Retrieve Linux externals
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-externals
+          path: apf_example
+      - name: Retrieve macOS external
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-externals
+          path: apf_example
+      - name: Retrieve Windows external
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-externals
+          path: apf_example
+      - name: Install deken
+        run: |
+          sudo apt-get install --no-install-recommends deken
+          # work-arounds from https://github.com/pure-data/deken/issues/247:
+          mkdir ~/.deken
+          python3 -m pip install hy==0.19
+      - name: Run deken
+        run: |
+          deken package -v $(git describe --tags --always) --objects examples/pure-data/objects.txt apf_example
+      - name: Upload deken package
+        uses: actions/upload-artifact@v2
+        with:
+          name: Deken package
+          path: "*.dek*"
