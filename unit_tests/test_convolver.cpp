@@ -5,7 +5,7 @@
 #define CHECK_RANGE(left, right, range) \
   for (int i = 0; i < range; ++i) { \
     INFO("i = " << i); \
-    CHECK((left)[i] == Approx((right)[i])); }
+    CHECK((left)[i] == Approx((right)[i]).scale(1)); }
 
 namespace c = apf::conv;
 

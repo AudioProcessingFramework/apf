@@ -2,3 +2,4 @@
 *.h diff=cpp
 /git* export-ignore
 /.* export-ignore
+/unit_tests/catch/catch.hpp linguist-vendored
