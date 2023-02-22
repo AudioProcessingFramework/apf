@@ -126,6 +126,7 @@ class JackClient
     /// @see jack_activate()
     bool activate() const
     {
+      APF_JACKCLIENT_DEBUG_MSG("Activating JACK client.\n");
       if (!_client || jack_activate(_client)) return false;
 
       this->connect_pending_connections();
@@ -233,6 +234,12 @@ class JackClient
           << still_pending_connections.size());
 
       _pending_connections.swap(still_pending_connections);
+
+      // Check if ports even exists
+      if (!_pending_connections.empty())
+      {
+        _assert_ports_available();
+      }
       return _pending_connections.empty();
     }
 
@@ -362,6 +369,10 @@ class JackClient
       (void)code;  // avoid "unused parameter" warning
       throw jack_error("JACK shutdown! Reason: " + std::string(reason));
     }
+    virtual void jack_shutdown_callback()
+    {
+      throw jack_error("JACK shutdown!");
+    }
 
     /// JACK sample rate callback.
     /// @param sr new sample rate delivered by JACK
@@ -408,10 +419,9 @@ class JackClient
       return static_cast<JackClient*>(arg)->jack_sync_callback(state, pos);
     }
 
-    static void _jack_shutdown_callback(jack_status_t code
-        , const char* reason, void* arg)
+    static void _jack_shutdown_callback(void* arg)
     {
-      static_cast<JackClient*>(arg)->jack_shutdown_callback(code, reason);
+      static_cast<JackClient*>(arg)->jack_shutdown_callback();
     }
 
     static int _jack_sample_rate_callback(nframes_t sr, void* arg)
@@ -436,8 +446,11 @@ class JackClient
         , const std::string& destination
         , _pending_connections_t& pending_connections) const
     {
+      APF_JACKCLIENT_DEBUG_MSG("Connection:"<< source << " -> " << destination );
       if (_client == nullptr) return false;
       int success = jack_connect(_client, source.c_str(), destination.c_str());
+      APF_JACKCLIENT_DEBUG_MSG("Connection returned :"<< success );
+
       switch (success)
       {
         case 0:
@@ -455,6 +468,26 @@ class JackClient
           return false;
       }
       return true;
+    }
+
+    void _assert_ports_available() const
+    {
+      // TODO check if input or output is required
+      const char **ports;
+      ports = jack_get_ports (_client, NULL, NULL,
+      JackPortIsPhysical|JackPortIsOutput);
+      if (ports == NULL) {
+        fprintf(stderr, "no physical capture ports\n");
+        exit (1);
+      }
+      free (ports);
+	    ports = jack_get_ports (_client, NULL, NULL,
+            JackPortIsPhysical|JackPortIsInput);
+      if (ports == NULL) {
+        fprintf(stderr, "no physical playback ports\n");
+        exit (1);
+      }
+      free (ports);
     }
 
     std::string    _client_name;  // Name of JACK client
@@ -504,6 +537,14 @@ JackClient::JackClient(const std::string& name
   _client = jack_client_open(name.c_str(), options, &status);
   if (!_client) throw jack_error(status);
 
+	if (status & JackServerStarted) {
+		fprintf (stderr, "JACK server started\n");
+	}
+	if (status & JackNameNotUnique) {
+		_client_name = jack_get_client_name(_client);
+		fprintf (stderr, "unique name `%s' assigned\n", _client_name.c_str());
+	}
+
   if (options & JackUseExactName)
   {
     assert(_client_name == jack_get_client_name(_client));
@@ -525,15 +566,16 @@ JackClient::JackClient(const std::string& name
     }
 
     // TODO: separate option to disable sync callback?
-
     if (jack_set_sync_callback(_client, _jack_sync_callback, this))
     {
       throw jack_error("Could not set sync callback function for '"
           + _client_name + "'!");
     }
   }
-
-  jack_on_info_shutdown(_client, _jack_shutdown_callback, this);
+  // jack_on_info_shutdown CAUSES ISSUES ON WINDOWS
+  // jack_on_info_shutdown(_client, _jack_shutdown_callback, this);
+  // Using jack_on_shutdown instead
+  jack_on_shutdown(_client, _jack_shutdown_callback, this);
 
   if (jack_set_xrun_callback(_client, _jack_xrun_callback, this))
   {
