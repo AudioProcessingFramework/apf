@@ -55,6 +55,10 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           release: false
+          install: >-
+            make
+            unzip
+            mingw-w64-x86_64-gcc
       - name: Install Pd
         run: |
           wget -q -O Pd.zip http://msp.ucsd.edu/Software/pd-0.51-3.msw.zip
