@@ -369,10 +369,15 @@ class MimoProcessor : public interface_policy
           , _parent(parent)
           , _thread(std::thread(&WorkerThread::_thread_function, this))
         {
-          // Set thread priority from interface_policy, if available
-          thread_traits<interface_policy
-            , std::thread::native_handle_type>::set_priority(parent
-                , _thread.native_handle());
+          try {
+            // Set thread priority from interface_policy, if available
+            thread_traits<interface_policy
+              , std::thread::native_handle_type>::set_priority(parent
+                  , _thread.native_handle());
+          } catch(...) {
+            this->~WorkerThread();
+            throw;
+          }
         }
 
         WorkerThread(WorkerThread&& other)
