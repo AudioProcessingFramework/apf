@@ -46,24 +46,24 @@ SECTION("inherited functions", "")
 {
   fvi fv(1);
 
-  fv.front();
-  fv.back();
-  fv.begin();
-  fv.end();
-  fv.rbegin();
-  fv.rend();
-  fv.cbegin();
-  fv.cend();
-  fv.crbegin();
-  fv.crend();
-  fv.size();
-  fv.max_size();
-  fv.capacity();
-  fv.empty();
-  fv[0];
-  fv.at(0);
-  fv.data();
-  fv.get_allocator();
+  (void)fv.front();
+  (void)fv.back();
+  (void)fv.begin();
+  (void)fv.end();
+  (void)fv.rbegin();
+  (void)fv.rend();
+  (void)fv.cbegin();
+  (void)fv.cend();
+  (void)fv.crbegin();
+  (void)fv.crend();
+  (void)fv.size();
+  (void)fv.max_size();
+  (void)fv.capacity();
+  (void)fv.empty();
+  (void)fv[0];
+  (void)fv.at(0);
+  (void)fv.data();
+  (void)fv.get_allocator();
 }
 
 SECTION("default constructor", "")
@@ -264,22 +264,22 @@ SECTION("inherited types", "")
 SECTION("inherited functions", "")
 {
   fli fl(1);
-  fl.begin();
-  fl.end();
-  fl.rbegin();
-  fl.rend();
-  fl.cbegin();
-  fl.cend();
-  fl.crbegin();
-  fl.crend();
-  fl.empty();
-  fl.size();
-  fl.max_size();
-  fl.front();
-  fl.back();
-  fl.get_allocator();
-  fl.reverse();
-  fl.sort();
+  (void)fl.begin();
+  (void)fl.end();
+  (void)fl.rbegin();
+  (void)fl.rend();
+  (void)fl.cbegin();
+  (void)fl.cend();
+  (void)fl.crbegin();
+  (void)fl.crend();
+  (void)fl.empty();
+  (void)fl.size();
+  (void)fl.max_size();
+  (void)fl.front();
+  (void)fl.back();
+  (void)fl.get_allocator();
+  (void)fl.reverse();
+  (void)fl.sort();
 }
 
 SECTION("default constructor", "")
