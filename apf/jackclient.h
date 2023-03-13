@@ -126,7 +126,7 @@ class JackClient
     /// @see jack_activate()
     bool activate() const
     {
-      APF_JACKCLIENT_DEBUG_MSG("Activating JACK client.\n");
+      APF_JACKCLIENT_DEBUG_MSG("Activating JACK client.");
       if (!_client || jack_activate(_client)) return false;
 
       this->connect_pending_connections();
@@ -235,11 +235,6 @@ class JackClient
 
       _pending_connections.swap(still_pending_connections);
 
-      // Check if ports even exists
-      if (!_pending_connections.empty())
-      {
-        _assert_ports_available();
-      }
       return _pending_connections.empty();
     }
 
@@ -359,19 +354,20 @@ class JackClient
     /// JACK shutdown callback.
     /// By default, this is throwing a jack_error exception. If you don't like
     /// this, you can overwrite this function in your derived class.
-    /// @param code status code, see JackInfoShutdownCallback
-    /// @param reason a string describing the shutdown reason
-    /// @see JackInfoShutdownCallback and jack_on_info_shutdown()
-    /// @note There is also JackShutdownCallback and jack_on_shutdown(), but
-    ///   this one is more useful.
-    virtual void jack_shutdown_callback(jack_status_t code, const char* reason)
-    {
-      (void)code;  // avoid "unused parameter" warning
-      throw jack_error("JACK shutdown! Reason: " + std::string(reason));
-    }
+    /// @see There is also JackShutdownCallback and jack_on_shutdown()
     virtual void jack_shutdown_callback()
     {
       throw jack_error("JACK shutdown!");
+    }
+
+    /// JACK info shutdown callback.
+    /// @param code status code, see JackInfoShutdownCallback
+    /// @param reason a string describing the shutdown reason
+    /// @see JackInfoShutdownCallback and jack_on_info_shutdown()
+    virtual void jack_info_shutdown_callback(jack_status_t code, const char* reason)
+    {
+      (void)code;  // avoid "unused parameter" warning
+      throw jack_error("JACK shutdown! Reason: " + std::string(reason));
     }
 
     /// JACK sample rate callback.
@@ -446,10 +442,10 @@ class JackClient
         , const std::string& destination
         , _pending_connections_t& pending_connections) const
     {
-      APF_JACKCLIENT_DEBUG_MSG("Connection:"<< source << " -> " << destination );
+      APF_JACKCLIENT_DEBUG_MSG("Connection: " << source << " -> " << destination);
       if (_client == nullptr) return false;
       int success = jack_connect(_client, source.c_str(), destination.c_str());
-      APF_JACKCLIENT_DEBUG_MSG("Connection returned :"<< success );
+      APF_JACKCLIENT_DEBUG_MSG("Connection returned: " << success);
 
       switch (success)
       {
@@ -468,26 +464,6 @@ class JackClient
           return false;
       }
       return true;
-    }
-
-    void _assert_ports_available() const
-    {
-      // TODO check if input or output is required
-      const char **ports;
-      ports = jack_get_ports (_client, NULL, NULL,
-      JackPortIsPhysical|JackPortIsOutput);
-      if (ports == NULL) {
-        fprintf(stderr, "no physical capture ports\n");
-        exit (1);
-      }
-      free (ports);
-	    ports = jack_get_ports (_client, NULL, NULL,
-            JackPortIsPhysical|JackPortIsInput);
-      if (ports == NULL) {
-        fprintf(stderr, "no physical playback ports\n");
-        exit (1);
-      }
-      free (ports);
     }
 
     std::string    _client_name;  // Name of JACK client
@@ -538,11 +514,11 @@ JackClient::JackClient(const std::string& name
   if (!_client) throw jack_error(status);
 
 	if (status & JackServerStarted) {
-		fprintf (stderr, "JACK server started\n");
+		APF_JACKCLIENT_DEBUG_MSG("Server started.");
 	}
 	if (status & JackNameNotUnique) {
 		_client_name = jack_get_client_name(_client);
-		fprintf (stderr, "unique name `%s' assigned\n", _client_name.c_str());
+		APF_JACKCLIENT_DEBUG_MSG("Unique name assigned: " << _client_name);
 	}
 
   if (options & JackUseExactName)

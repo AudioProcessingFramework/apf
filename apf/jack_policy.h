@@ -126,11 +126,11 @@ struct thread_traits<jack_policy, pthread_t>
 {
   static void update_priority(const jack_policy& obj, pthread_t thread_id) noexcept
   {
+    if (obj.is_realtime())
+    {
 #ifdef APF_JACK_POLICY_DEBUG
     printf("Trying to set priority...");
 #endif
-    if (obj.is_realtime())
-    {
       struct sched_param param;
       param.sched_priority = obj.get_real_time_priority();
       if (pthread_setschedparam(thread_id, SCHED_FIFO, &param))
@@ -229,7 +229,7 @@ jack_policy::Xput<X>::_init_port(const parameter_map& p, jack_policy& parent)
   }
   JackClient::port_t* rport = X::is_input ? parent.register_in_port(name) : parent.register_out_port(name);
   if (rport==NULL){
-    throw std::runtime_error("no more JACK ports available\n");
+    throw std::runtime_error("Could not register JACK ports!");
   }
   return rport;
 }
