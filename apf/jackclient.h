@@ -41,7 +41,6 @@
 #include <errno.h>    // for EEXIST
 
 #ifdef APF_JACKCLIENT_DEBUG
-#include <iostream>
 #include <jack/statistics.h>  // for jack_get_xrun_delayed_usecs()
 #define APF_JACKCLIENT_DEBUG_MSG(str) \
   do { std::cout << "apf::JackClient: " << str << std::endl; } while (false)
@@ -549,7 +548,6 @@ JackClient::JackClient(const std::string& name
     }
   }
   // jack_on_info_shutdown CAUSES ISSUES ON WINDOWS
-  // jack_on_info_shutdown(_client, _jack_shutdown_callback, this);
   // Using jack_on_shutdown instead
   jack_on_shutdown(_client, _jack_shutdown_callback, this);
 
