@@ -124,7 +124,7 @@ struct thread_traits;  // definition in mimoprocessor.h
 template<>
 struct thread_traits<jack_policy, pthread_t>
 {
-  static void set_priority(const jack_policy& obj, pthread_t thread_id)
+  static void update_priority(const jack_policy& obj, pthread_t thread_id) noexcept
   {
 #ifdef APF_JACK_POLICY_DEBUG
     printf("Trying to set priority...");
@@ -135,9 +135,11 @@ struct thread_traits<jack_policy, pthread_t>
       param.sched_priority = obj.get_real_time_priority();
       if (pthread_setschedparam(thread_id, SCHED_FIFO, &param))
       {
-        //throw std::runtime_error("Can't set scheduling priority for thread!");
-        std::cout << "Can't set scheduling priority for thread "
-                  << thread_id <<": " << param.sched_priority << std::endl;
+        // We were trying our best to set the priority, but if it doesn't work,
+        // the show must go on!
+#ifdef APF_JACK_POLICY_DEBUG
+        printf("Can't set scheduling priority %d for thread!\n", param.sched_priority);
+#endif
       }
     }
     else
