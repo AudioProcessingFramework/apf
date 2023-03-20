@@ -229,7 +229,7 @@ jack_policy::Xput<X>::_init_port(const parameter_map& p, jack_policy& parent)
   }
   JackClient::port_t* rport = X::is_input ? parent.register_in_port(name) : parent.register_out_port(name);
   if (rport==NULL){
-    throw std::runtime_error("Could not register JACK ports!");
+    throw std::runtime_error("Could not register JACK port!");
   }
   return rport;
 }
