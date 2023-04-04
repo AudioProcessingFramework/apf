@@ -492,13 +492,7 @@ JackClient::JackClient(const std::string& name
     throw jack_error("Client name is too long! ('" + name + "')");
   }
 
-  // TODO: make parameters for these options:
-  //jack_options_t options = JackNoStartServer;
-  jack_options_t options = JackUseExactName;
-  //jack_options_t options = JackNullOption;
-
-  // JackNoStartServer: see also JACK_NO_START_SERVER
-  // TODO: JackServerName? needs extra parameter in jack_client_open()!
+  jack_options_t options = JackNoStartServer | JackUseExactName;
 
   jack_status_t status;
   _client = jack_client_open(name.c_str(), options, &status);
