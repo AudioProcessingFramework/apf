@@ -34,7 +34,6 @@
 #include <cstdio>  // for printf()
 #endif
 
-#include <iostream>
 #include <cassert>  // for assert()
 
 #include "apf/jackclient.h"

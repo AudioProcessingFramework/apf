@@ -359,16 +359,6 @@ class JackClient
       throw jack_error("JACK shutdown!");
     }
 
-    /// JACK info shutdown callback.
-    /// @param code status code, see JackInfoShutdownCallback
-    /// @param reason a string describing the shutdown reason
-    /// @see JackInfoShutdownCallback and jack_on_info_shutdown()
-    virtual void jack_info_shutdown_callback(jack_status_t code, const char* reason)
-    {
-      (void)code;  // avoid "unused parameter" warning
-      throw jack_error("JACK shutdown! Reason: " + std::string(reason));
-    }
-
     /// JACK sample rate callback.
     /// @param sr new sample rate delivered by JACK
     /// @throw jack_error if not implemented
