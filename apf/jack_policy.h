@@ -123,15 +123,22 @@ struct thread_traits;  // definition in mimoprocessor.h
 template<>
 struct thread_traits<jack_policy, pthread_t>
 {
-  static void set_priority(const jack_policy& obj, pthread_t thread_id)
+  static void update_priority(const jack_policy& obj, pthread_t thread_id) noexcept
   {
     if (obj.is_realtime())
     {
+#ifdef APF_JACK_POLICY_DEBUG
+    printf("Trying to set priority...");
+#endif
       struct sched_param param;
       param.sched_priority = obj.get_real_time_priority();
       if (pthread_setschedparam(thread_id, SCHED_FIFO, &param))
       {
-        throw std::runtime_error("Can't set scheduling priority for thread!");
+        // We were trying our best to set the priority, but if it doesn't work,
+        // the show must go on!
+#ifdef APF_JACK_POLICY_DEBUG
+        printf("Can't set scheduling priority %d for thread!\n", param.sched_priority);
+#endif
       }
     }
     else
@@ -219,9 +226,11 @@ jack_policy::Xput<X>::_init_port(const parameter_map& p, jack_policy& parent)
 
     name = p.get(X::prefix_name(), X::default_prefix()) + id;
   }
-
-  return X::is_input
-    ? parent.register_in_port(name) : parent.register_out_port(name);
+  JackClient::port_t* rport = X::is_input ? parent.register_in_port(name) : parent.register_out_port(name);
+  if (rport==NULL){
+    throw std::runtime_error("Could not register JACK port!");
+  }
+  return rport;
 }
 
 template<typename X>

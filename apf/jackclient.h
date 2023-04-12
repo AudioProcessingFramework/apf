@@ -41,7 +41,6 @@
 #include <errno.h>    // for EEXIST
 
 #ifdef APF_JACKCLIENT_DEBUG
-#include <iostream>
 #include <jack/statistics.h>  // for jack_get_xrun_delayed_usecs()
 #define APF_JACKCLIENT_DEBUG_MSG(str) \
   do { std::cout << "apf::JackClient: " << str << std::endl; } while (false)
@@ -126,6 +125,7 @@ class JackClient
     /// @see jack_activate()
     bool activate() const
     {
+      APF_JACKCLIENT_DEBUG_MSG("Activating JACK client.");
       if (!_client || jack_activate(_client)) return false;
 
       this->connect_pending_connections();
@@ -233,6 +233,7 @@ class JackClient
           << still_pending_connections.size());
 
       _pending_connections.swap(still_pending_connections);
+
       return _pending_connections.empty();
     }
 
@@ -352,15 +353,10 @@ class JackClient
     /// JACK shutdown callback.
     /// By default, this is throwing a jack_error exception. If you don't like
     /// this, you can overwrite this function in your derived class.
-    /// @param code status code, see JackInfoShutdownCallback
-    /// @param reason a string describing the shutdown reason
-    /// @see JackInfoShutdownCallback and jack_on_info_shutdown()
-    /// @note There is also JackShutdownCallback and jack_on_shutdown(), but
-    ///   this one is more useful.
-    virtual void jack_shutdown_callback(jack_status_t code, const char* reason)
+    /// @see There is also JackShutdownCallback and jack_on_shutdown()
+    virtual void jack_shutdown_callback()
     {
-      (void)code;  // avoid "unused parameter" warning
-      throw jack_error("JACK shutdown! Reason: " + std::string(reason));
+      throw jack_error("JACK shutdown!");
     }
 
     /// JACK sample rate callback.
@@ -408,10 +404,9 @@ class JackClient
       return static_cast<JackClient*>(arg)->jack_sync_callback(state, pos);
     }
 
-    static void _jack_shutdown_callback(jack_status_t code
-        , const char* reason, void* arg)
+    static void _jack_shutdown_callback(void* arg)
     {
-      static_cast<JackClient*>(arg)->jack_shutdown_callback(code, reason);
+      static_cast<JackClient*>(arg)->jack_shutdown_callback();
     }
 
     static int _jack_sample_rate_callback(nframes_t sr, void* arg)
@@ -436,8 +431,11 @@ class JackClient
         , const std::string& destination
         , _pending_connections_t& pending_connections) const
     {
+      APF_JACKCLIENT_DEBUG_MSG("Connection: " << source << " -> " << destination);
       if (_client == nullptr) return false;
       int success = jack_connect(_client, source.c_str(), destination.c_str());
+      APF_JACKCLIENT_DEBUG_MSG("Connection returned: " << success);
+
       switch (success)
       {
         case 0:
@@ -504,6 +502,14 @@ JackClient::JackClient(const std::string& name
   _client = jack_client_open(name.c_str(), options, &status);
   if (!_client) throw jack_error(status);
 
+	if (status & JackServerStarted) {
+		APF_JACKCLIENT_DEBUG_MSG("Server started.");
+	}
+	if (status & JackNameNotUnique) {
+		_client_name = jack_get_client_name(_client);
+		APF_JACKCLIENT_DEBUG_MSG("Unique name assigned: " << _client_name);
+	}
+
   if (options & JackUseExactName)
   {
     assert(_client_name == jack_get_client_name(_client));
@@ -525,15 +531,15 @@ JackClient::JackClient(const std::string& name
     }
 
     // TODO: separate option to disable sync callback?
-
     if (jack_set_sync_callback(_client, _jack_sync_callback, this))
     {
       throw jack_error("Could not set sync callback function for '"
           + _client_name + "'!");
     }
   }
-
-  jack_on_info_shutdown(_client, _jack_shutdown_callback, this);
+  // jack_on_info_shutdown CAUSES ISSUES ON WINDOWS
+  // Using jack_on_shutdown instead
+  jack_on_shutdown(_client, _jack_shutdown_callback, this);
 
   if (jack_set_xrun_callback(_client, _jack_xrun_callback, this))
   {

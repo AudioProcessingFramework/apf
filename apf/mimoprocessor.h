@@ -78,7 +78,7 @@ namespace apf
 template<typename interface_policy, typename native_handle_type>
 struct thread_traits
 {
-  static void set_priority(const interface_policy&, native_handle_type) {}
+  static void update_priority(const interface_policy&, native_handle_type) noexcept {}
 };
 
 class enable_queries
@@ -371,7 +371,7 @@ class MimoProcessor : public interface_policy
         {
           // Set thread priority from interface_policy, if available
           thread_traits<interface_policy
-            , std::thread::native_handle_type>::set_priority(parent
+            , std::thread::native_handle_type>::update_priority(parent
                 , _thread.native_handle());
         }
 
