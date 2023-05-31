@@ -1,5 +1,13 @@
 User-visible changes in the Audio Processing Framework. Recent changes on top.
 
+0.5.0 (31 May 2023)
+
+ - don't auto-start jackd
+
+ - use jack_on_shutdown instead of jack_on_info_shutdown for Windows compatibility
+
+ - stop calling JACK callback after an exception
+
 0.4.0 (09 October 2020)
 
  - remove all thread policies, replace them with native C++11 threads
