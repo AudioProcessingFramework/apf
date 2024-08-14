@@ -30,6 +30,7 @@ jobs:
             portaudio
           )
           brew install ${PACKAGES[@]}
+          echo "CPPFLAGS=-I/opt/homebrew/include" >> "$GITHUB_ENV"
       - name: checkout APF source code
         uses: actions/checkout@v2
       - name: run unit tests
