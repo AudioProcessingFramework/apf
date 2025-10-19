@@ -85,13 +85,19 @@ jobs:
           path: apf/examples/pure-data/build/*
 
   deken-package:
-    # Deken is not available on 22.04,
-    # see https://github.com/pure-data/deken/issues/260
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container: registry.git.iem.at/pd/deken
     needs: [linux, macos, windows]
     steps:
-      - name: Clone Git repository
-        uses: actions/checkout@v2
+      - name: Install Git
+        run: |
+          apt-get update
+          apt-get install --assume-yes --no-install-recommends git
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # https://github.com/actions/checkout/issues/1169
+          set-safe-directory: ${{ github.workspace }}
       - name: Retrieve Linux externals
         uses: actions/download-artifact@v2
         with:
@@ -107,12 +113,6 @@ jobs:
         with:
           name: windows-externals
           path: apf_example
-      - name: Install deken
-        run: |
-          sudo apt-get install --no-install-recommends deken
-          # work-arounds from https://github.com/pure-data/deken/issues/247:
-          mkdir ~/.deken
-          python3 -m pip install hy==0.19
       - name: Run deken
         run: |
           deken package -v $(git describe --tags --always) --objects examples/pure-data/objects.txt apf_example
