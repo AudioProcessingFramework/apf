@@ -96,8 +96,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # https://github.com/actions/checkout/issues/1169
-          set-safe-directory: ${{ github.workspace }}
+          # check out all tags to get proper version in Deken package
+          fetch-depth: 0
+      - name: git clone fix
+        # https://github.com/actions/checkout/issues/1169:
+        run: git config --system --add safe.directory $GITHUB_WORKSPACE
       - name: Retrieve Linux externals
         uses: actions/download-artifact@v5
         with:
