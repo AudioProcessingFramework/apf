@@ -4,7 +4,7 @@ jobs:
   examples:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
       - name: install Ubuntu packages
