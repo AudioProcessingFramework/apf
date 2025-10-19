@@ -93,17 +93,17 @@ jobs:
       - name: Clone Git repository
         uses: actions/checkout@v2
       - name: Retrieve Linux externals
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v5
         with:
           name: linux-externals
           path: apf_example
       - name: Retrieve macOS external
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v5
         with:
           name: macos-externals
           path: apf_example
       - name: Retrieve Windows external
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v5
         with:
           name: windows-externals
           path: apf_example
