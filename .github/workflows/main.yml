@@ -33,7 +33,7 @@ jobs:
           echo "CPPFLAGS=-I/opt/homebrew/include" >> "$GITHUB_ENV"
           echo "LDFLAGS=-L/opt/homebrew/lib" >> "$GITHUB_ENV"
       - name: checkout APF source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: run unit tests
         run: |
           make -C unit_tests
