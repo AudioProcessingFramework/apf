@@ -17,7 +17,7 @@ jobs:
         run: |
           make install DESTDIR=build PDLIBDIR=
       - name: upload Linux externals
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: linux-externals
           path: apf/examples/pure-data/build/*
@@ -40,7 +40,7 @@ jobs:
         run: |
           make install DESTDIR=build PDLIBDIR=
       - name: upload macOS externals
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: macos-externals
           path: apf/examples/pure-data/build/*
@@ -79,7 +79,7 @@ jobs:
         run: |
           make install DESTDIR=build PDLIBDIR=
       - name: upload Windows externals
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: windows-externals
           path: apf/examples/pure-data/build/*
@@ -120,7 +120,7 @@ jobs:
         run: |
           deken package -v $(git describe --tags --always) --objects examples/pure-data/objects.txt apf_example
       - name: Upload deken package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Deken package
           path: "*.dek*"
